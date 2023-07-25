@@ -44549,7 +44549,7 @@ body {
 }
 
 .web-landing .web-section-01 {
-    background: url("/assets/img/Bg_Option1.png") center center no-repeat;
+    /* background: url("/assets/img/Bg_Option1.png") center center no-repeat; */
     background-size:cover;
     min-height: 45rem;
     align-items: flex-end

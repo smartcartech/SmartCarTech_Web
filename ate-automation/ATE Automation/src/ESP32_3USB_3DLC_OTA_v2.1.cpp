@@ -20,7 +20,7 @@
 #include <WiFiManager.h>        // THƯ VIỆN WIFIMANAGER
 
 // Thông số cho HTTPS OTA (Kiểm tra phiên bản)
-const float current_version = 2.1; // Cập nhật phiên bản
+const float current_version = 2.1; // Cập nhật phiên bản mỗi khi thay đổi firmware
 const char* version_url = "https://smartcartech.vn/ate-automation/firmware/version.json"; 
 const char* base_bin_url = "https://smartcartech.vn/ate-automation/firmware/";
 

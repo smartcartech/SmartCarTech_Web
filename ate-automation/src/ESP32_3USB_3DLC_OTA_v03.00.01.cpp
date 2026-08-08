@@ -20,7 +20,18 @@
 #include <WiFiManager.h>        // THƯ VIỆN WIFIMANAGER
 
 // Thông số cho HTTPS OTA (Kiểm tra phiên bản)
-const float current_version = 2.1; // Cập nhật phiên bản mỗi khi thay đổi firmware
+// VERSION_NAME: chỉ dùng để hiển thị cho người dùng.
+// VERSION_CODE: dùng để so sánh OTA, tuyệt đối không dùng float.
+//
+// Quy ước VERSION_NAME -> VERSION_CODE:
+// Ví dụ:
+//   02.01.01  -> 20101
+//   02.01.02  -> 20102
+//   10.08.01  -> 100801
+
+const char* CURRENT_VERSION = "03.00.01";
+const uint32_t CURRENT_VERSION_CODE = 30001;
+
 const char* version_url = "https://smartcartech.vn/ate-automation/firmware/version.json"; 
 const char* base_bin_url = "https://smartcartech.vn/ate-automation/firmware/";
 
@@ -148,7 +159,7 @@ void setup() {
   // Hiển thị Firmware Version ra giữa màn hình
   lcd.setCursor(3, 2); 
   lcd.print("Firmware V"); 
-  lcd.print(current_version, 1);
+  lcd.print(CURRENT_VERSION);
 
   lcd.setCursor(0, 3); lcd.print("- Design by TuanLe -");
   delay(3000); 
@@ -467,88 +478,161 @@ void handleSerialCommands() {
 // ==========================================
 void updateFirmwareFromInternet() {
   lcd.clear();
-  lcd.setCursor(0, 1); lcd.print("Checking OTA...");
+  lcd.setCursor(0, 1); 
+  lcd.print("Checking OTA...");
 
-  if (WiFi.status() == WL_CONNECTED) {
-    safeStopAll(); 
-
-    WiFiClientSecure client;
-    client.setInsecure(); // Bỏ qua kiểm tra chứng chỉ SSL
-    
-    HTTPClient http;
-    http.begin(client, version_url); 
-    
-    int httpCode = http.GET();
-    
-    if (httpCode == HTTP_CODE_OK) {
-      String payload = http.getString();
-      
-      JsonDocument doc;
-      DeserializationError error = deserializeJson(doc, payload);
-
-      if (error) {
-        lcd.clear();
-        lcd.setCursor(0, 1); lcd.print("JSON Error!");
-        delay(1500);
-        http.end();
-        return;
-      }
-
-      float new_version = doc["version"];
-      const char* bin_file_name = doc["bin_file"];
-      
-      if (new_version > current_version) {
-        // CẬP NHẬT GIAO DIỆN HIỂN THỊ VERSION KHI CÓ BẢN MỚI
-        lcd.clear();
-        lcd.setCursor(0, 0); lcd.print("New Version Found!");
-        lcd.setCursor(0, 1); lcd.print("Cur V: "); lcd.print(current_version, 1);
-        lcd.setCursor(0, 2); lcd.print("New V: "); lcd.print(new_version, 1);
-        lcd.setCursor(0, 3); lcd.print("Downloading FW...");
-        
-        String full_bin_url = String(base_bin_url) + String(bin_file_name);
-        http.end(); 
-        
-        t_httpUpdate_return ret = httpUpdate.update(client, full_bin_url);
-
-        switch (ret) {
-          case HTTP_UPDATE_FAILED:
-            lcd.clear();
-            lcd.setCursor(0, 1); lcd.print("Update Failed!");
-            lcd.setCursor(0, 2); lcd.print(httpUpdate.getLastErrorString());
-            delay(3000);
-            break;
-          case HTTP_UPDATE_NO_UPDATES:
-            lcd.clear();
-            lcd.setCursor(0, 1); lcd.print("No Update Needed");
-            delay(1500);
-            break;
-          case HTTP_UPDATE_OK:
-            lcd.clear();
-            lcd.setCursor(0, 1); lcd.print("Update Success!");
-            lcd.setCursor(0, 2); lcd.print("Rebooting...");
-            delay(1000);
-            ESP.restart();
-            break;
-        }
-      } else {
-        lcd.clear();
-        lcd.setCursor(0, 1); lcd.print("Already Up To Date");
-        delay(1500);
-        http.end();
-      }
-    } else {
-      lcd.clear();
-      lcd.setCursor(0, 1); lcd.print("Server Error: ");
-      lcd.print(httpCode);
-      delay(1500);
-      http.end();
-    }
-  } else {
+  if (WiFi.status() != WL_CONNECTED) {
     lcd.clear();
-    lcd.setCursor(0, 1); lcd.print("No WiFi Connection!");
+    lcd.setCursor(0, 1); 
+    lcd.print("No WiFi Connection!");
     delay(1500);
+    return;
+  }
+
+  safeStopAll();
+
+  WiFiClientSecure client;
+  client.setInsecure(); // Bỏ qua kiểm tra chứng chỉ SSL
+
+  HTTPClient http;
+  http.begin(client, version_url);
+
+  int httpCode = http.GET();
+
+  if (httpCode != HTTP_CODE_OK) {
+    lcd.clear();
+    lcd.setCursor(0, 1); 
+    lcd.print("Server Error: ");
+    lcd.print(httpCode);
+    delay(1500);
+    http.end();
+    return;
+  }
+
+  String payload = http.getString();
+
+  JsonDocument doc;
+  DeserializationError error = deserializeJson(doc, payload);
+
+  if (error) {
+    lcd.clear();
+    lcd.setCursor(0, 1); 
+    lcd.print("JSON Error!");
+    delay(1500);
+    http.end();
+    return;
+  }
+
+  // Đọc version từ JSON:
+  // {
+  //   "version": "03.00.01",
+  //   "version_code": 30001,
+  //   "bin_file": "ESP32_3USB_3DLC_OTA_v03.00.01.bin"
+  // }
+  const char* new_version = doc["version"] | "";
+  uint32_t new_version_code = doc["version_code"] | 0;
+  const char* bin_file_name = doc["bin_file"] | "";
+
+  // Kiểm tra JSON có đủ dữ liệu bắt buộc hay không
+  if (new_version_code == 0 || strlen(new_version) == 0 || strlen(bin_file_name) == 0) {
+    lcd.clear();
+    lcd.setCursor(0, 0); 
+    lcd.print("Invalid version.json");
+    lcd.setCursor(0, 1); 
+    lcd.print("Missing data!");
+    delay(2000);
+    http.end();
+    return;
+  }
+
+  // Debug ra USB Serial để dễ kiểm tra khi cần
+  USBSerial.print("Current Version: ");
+  USBSerial.println(CURRENT_VERSION);
+  USBSerial.print("Current Version Code: ");
+  USBSerial.println(CURRENT_VERSION_CODE);
+  USBSerial.print("Server Version: ");
+  USBSerial.println(new_version);
+  USBSerial.print("Server Version Code: ");
+  USBSerial.println(new_version_code);
+
+  // Chỉ OTA khi VERSION_CODE trên server lớn hơn VERSION_CODE hiện tại
+  if (new_version_code > CURRENT_VERSION_CODE) {
+    lcd.clear();
+    lcd.setCursor(0, 0); 
+    lcd.print("New Version Found!");
+
+    lcd.setCursor(0, 1); 
+    lcd.print("Current Version: "); 
+    lcd.print(CURRENT_VERSION);
+
+    lcd.setCursor(0, 2); 
+    lcd.print("New Version: "); 
+    lcd.print(new_version);
+
+    lcd.setCursor(0, 3); 
+    lcd.print("Downloading FW...");
+
+    String full_bin_url = String(base_bin_url) + String(bin_file_name);
+
+    // Kết thúc HTTP request version.json trước khi download file BIN
+    http.end();
+
+    t_httpUpdate_return ret = httpUpdate.update(client, full_bin_url);
+
+    switch (ret) {
+      case HTTP_UPDATE_FAILED:
+        lcd.clear();
+        lcd.setCursor(0, 0); 
+        lcd.print("Update Failed!");
+
+        lcd.setCursor(0, 1); 
+        lcd.print("Error: ");
+        lcd.print(httpUpdate.getLastError());
+
+        lcd.setCursor(0, 2); 
+        lcd.print(httpUpdate.getLastErrorString());
+        delay(3000);
+        break;
+
+      case HTTP_UPDATE_NO_UPDATES:
+        lcd.clear();
+        lcd.setCursor(0, 1); 
+        lcd.print("No Update Needed");
+        delay(1500);
+        break;
+
+      case HTTP_UPDATE_OK:
+        // ESP32 HTTPUpdate thường tự restart sau khi update thành công.
+        // Đoạn dưới vẫn giữ để hiển thị trạng thái nếu thư viện trả về.
+        lcd.clear();
+        lcd.setCursor(0, 1); 
+        lcd.print("Update Success!");
+        lcd.setCursor(0, 2); 
+        lcd.print("Rebooting...");
+        delay(1000);
+        ESP.restart();
+        break;
+    }
+  } 
+  else {
+    // VERSION_CODE bằng hoặc nhỏ hơn firmware hiện tại -> KHÔNG download
+    lcd.clear();
+    lcd.setCursor(0, 0); 
+    lcd.print("Already Up To Date");
+
+    lcd.setCursor(0, 1); 
+    lcd.print("Current Version: "); 
+    lcd.print(CURRENT_VERSION);
+
+    lcd.setCursor(0, 2); 
+    lcd.print("Server Version: "); 
+    lcd.print(new_version);
+
+    delay(1500);
+    http.end();
   }
 }
+
 
 void trigger11Keys() {
   for (int p = 0; p < 11; p++) {

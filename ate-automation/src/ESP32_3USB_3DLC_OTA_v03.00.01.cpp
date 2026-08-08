@@ -157,7 +157,7 @@ void setup() {
   lcd.setCursor(0, 0); lcd.print(" INNOVA Automation");
   
   // Hiển thị Firmware Version ra giữa màn hình
-  lcd.setCursor(3, 2); 
+  lcd.setCursor(1, 2); 
   lcd.print("Firmware V"); 
   lcd.print(CURRENT_VERSION);
 
@@ -188,7 +188,7 @@ void setup() {
     // CẤU HÌNH LOCAL OTA
     ArduinoOTA.setHostname("ATE-Tool-System");
     ArduinoOTA.onStart([]() {
-      safeStopAll(); 
+
       lcd.clear();
       printCentered(1, "LOCAL OTA UPDATING..");
     });
@@ -302,7 +302,6 @@ void loop() {
         // =======================================
         // CHỨC NĂNG ĐỔI WIFI TỪ MENU
         // =======================================
-        safeStopAll();
         lcd.clear();
         printCentered(0, "WIFI SETTING");
         lcd.setCursor(0, 1); lcd.print("AP: ATE_Setup_WiFi");
@@ -417,7 +416,7 @@ void handleSerialCommands() {
         else if (cmdBuffer[1] == 0x00 && cmdBuffer[2] == 0x04) {
           if (cmdBuffer[3] == 0x02) {
             runStep = 7; 
-            lcd.setCursor(0, 2); lcd.print("Disconnecting...    ");
+            lcd.setCursor(0, 2); lcd.print("Changing Tool...");
           }
           else if (cmdBuffer[3] == 0x00) {
             safeStopAll();
@@ -489,7 +488,6 @@ void updateFirmwareFromInternet() {
     return;
   }
 
-  safeStopAll();
 
   WiFiClientSecure client;
   client.setInsecure(); // Bỏ qua kiểm tra chứng chỉ SSL
@@ -562,11 +560,11 @@ void updateFirmwareFromInternet() {
     lcd.print("New Version Found!");
 
     lcd.setCursor(0, 1); 
-    lcd.print("Current Version: "); 
+    lcd.print("Current V: "); 
     lcd.print(CURRENT_VERSION);
 
     lcd.setCursor(0, 2); 
-    lcd.print("New Version: "); 
+    lcd.print("New V: "); 
     lcd.print(new_version);
 
     lcd.setCursor(0, 3); 
@@ -621,11 +619,11 @@ void updateFirmwareFromInternet() {
     lcd.print("Already Up To Date");
 
     lcd.setCursor(0, 1); 
-    lcd.print("Current Version: "); 
+    lcd.print("Current V: "); 
     lcd.print(CURRENT_VERSION);
 
     lcd.setCursor(0, 2); 
-    lcd.print("Server Version: "); 
+    lcd.print("Server V: "); 
     lcd.print(new_version);
 
     delay(1500);
@@ -657,7 +655,7 @@ void handleRunSequence() {
       usbServos[currentPair].write(usbAngleB[currentPair]);
       
       previousMillis = currentMillis; runStep = 4;
-      if(isRunManually) { lcd.setCursor(0, 2); lcd.print("Connecting...       "); }
+      if(isRunManually) { lcd.setCursor(0, 2); lcd.print("USB Connected..."); }
       break;
       
     case 4: 
@@ -672,7 +670,7 @@ void handleRunSequence() {
         mcp.digitalWrite(DLC_RELAY_PINS[currentPair], LOW); 
         runStep = 6; 
         previousMillis = currentMillis; 
-        if (isRunManually) { lcd.setCursor(0, 2); lcd.print("Wait Connect...     "); } 
+        if (isRunManually) { lcd.setCursor(0, 2); lcd.print("DLC Connected..."); } 
         else { lcd.setCursor(0, 2); lcd.print("Waiting PC Command.."); }
       }
       break;
@@ -685,7 +683,7 @@ void handleRunSequence() {
           if (currentMillis - previousMillis >= waitTime) {
               lcd.setCursor(0, 2); lcd.print("Testing 11 Keys...  ");
               trigger11Keys(); 
-              lcd.setCursor(0, 2); lcd.print("Wait Connect...     ");
+              
               previousMillis = millis(); runStep = 61; 
           }
       }
@@ -695,7 +693,7 @@ void handleRunSequence() {
       if (isRunManually) {
           if (currentMillis - previousMillis >= 3000UL) {
               runStep = 7;
-              lcd.setCursor(0, 2); lcd.print("Disconnecting...    ");
+              lcd.setCursor(0, 2); lcd.print("Changing Tool...");
           }
       }
       break;
@@ -722,7 +720,7 @@ void handleRunSequence() {
         
         previousMillis = currentMillis; 
         runStep = 2; 
-        lcd.setCursor(0, 2); lcd.print("Wait Disconnect...  "); 
+        lcd.setCursor(0, 2); lcd.print("Change Complete..."); 
       }
       break;
   }

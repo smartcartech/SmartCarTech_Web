@@ -29,8 +29,8 @@
 //   02.01.02  -> 20102
 //   10.08.01  -> 100801
 
-const char* CURRENT_VERSION = "03.00.03";
-const uint32_t CURRENT_VERSION_CODE = 30003;
+const char* CURRENT_VERSION = "03.00.04";
+const uint32_t CURRENT_VERSION_CODE = 30004;
 
 const char* version_url = "https://smartcartech.vn/ate-automation/firmware/version.json"; 
 const char* base_bin_url = "https://smartcartech.vn/ate-automation/firmware/";
@@ -565,7 +565,7 @@ void updateFirmwareFromInternet() {
     lcd.print(CURRENT_VERSION);
 
     lcd.setCursor(0, 2); 
-    lcd.print("New V: "); 
+    lcd.print("New V:     "); 
     lcd.print(new_version);
 
     lcd.setCursor(0, 3); 
@@ -617,14 +617,14 @@ void updateFirmwareFromInternet() {
     // VERSION_CODE bằng hoặc nhỏ hơn firmware hiện tại -> KHÔNG download
     lcd.clear();
     lcd.setCursor(0, 0); 
-    lcd.print("Already Up To Date");
+    lcd.print("Already Up To Date!");
 
     lcd.setCursor(0, 1); 
     lcd.print("Current V: "); 
     lcd.print(CURRENT_VERSION);
 
     lcd.setCursor(0, 2); 
-    lcd.print("Server V: "); 
+    lcd.print("Server V:  "); 
     lcd.print(new_version);
 
     delay(3000);

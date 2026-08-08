@@ -29,8 +29,8 @@
 //   02.01.02  -> 20102
 //   10.08.01  -> 100801
 
-const char* CURRENT_VERSION = "03.00.02";
-const uint32_t CURRENT_VERSION_CODE = 30002;
+const char* CURRENT_VERSION = "03.00.03";
+const uint32_t CURRENT_VERSION_CODE = 30003;
 
 const char* version_url = "https://smartcartech.vn/ate-automation/firmware/version.json"; 
 const char* base_bin_url = "https://smartcartech.vn/ate-automation/firmware/";
@@ -184,6 +184,7 @@ void setup() {
     printCentered(0, "WIFI CONNECTED!");
     lcd.setCursor(0, 1); lcd.print("IP:"); 
     lcd.print(WiFi.localIP());
+    delay(1500);
 
     // CẤU HÌNH LOCAL OTA
     ArduinoOTA.setHostname("ATE-Tool-System");
@@ -626,7 +627,7 @@ void updateFirmwareFromInternet() {
     lcd.print("Server V: "); 
     lcd.print(new_version);
 
-    delay(1500);
+    delay(3000);
     http.end();
   }
 }

@@ -29,8 +29,8 @@
 //   02.01.02  -> 20102
 //   10.08.01  -> 100801
 
-const char* CURRENT_VERSION = "03.00.01";
-const uint32_t CURRENT_VERSION_CODE = 30001;
+const char* CURRENT_VERSION = "03.00.02";
+const uint32_t CURRENT_VERSION_CODE = 30002;
 
 const char* version_url = "https://smartcartech.vn/ate-automation/firmware/version.json"; 
 const char* base_bin_url = "https://smartcartech.vn/ate-automation/firmware/";

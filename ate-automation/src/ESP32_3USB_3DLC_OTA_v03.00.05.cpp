@@ -1,3 +1,17 @@
+// ============================================================
+// NOTE / LOGIC - WIFI UPDATE
+// 1) BOOT: chỉ thử kết nối Wi-Fi đã lưu trong 10 giây.
+//    Nếu thất bại -> chạy Offline. KHÔNG tự phát AP cấu hình.
+// 2) Chỉ khi user vào Function -> Wifi Setting:
+//    ESP32 mới phát AP "ATE_Setup_WiFi", IP 192.168.4.1.
+// 3) Wifi Setting KHÔNG timeout; portal chạy non-blocking.
+// 4) Trong Wifi Setting, nhấn OK -> hỏi "Exit WiFi Setting?".
+//    Dùng DOWN chọn No/Yes, nhấn OK để xác nhận.
+//    Mặc định chọn No để tránh thoát nhầm.
+// 5) Khi user cấu hình Wi-Fi mới thành công -> hiện "WiFi Updated!"
+//    và ESP32 tự reboot.
+// ============================================================
+
 #include <Arduino.h>
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
@@ -29,8 +43,8 @@
 //   02.01.02  -> 20102
 //   10.08.01  -> 100801
 
-const char* CURRENT_VERSION = "03.00.04";
-const uint32_t CURRENT_VERSION_CODE = 30004;
+const char* CURRENT_VERSION = "03.00.05";
+const uint32_t CURRENT_VERSION_CODE = 30005;
 
 const char* version_url = "https://smartcartech.vn/ate-automation/firmware/version.json"; 
 const char* base_bin_url = "https://smartcartech.vn/ate-automation/firmware/";
@@ -86,6 +100,18 @@ int runStep = 6; // Mặc định chạy ở Step 6 (Chờ PC Command)
 
 bool lastOk = HIGH, lastDown = HIGH, lastPlus = HIGH, lastMinus = HIGH, lastRun = HIGH;
 
+// ==========================================
+// BIẾN CHO WIFI SETTING (CONFIG PORTAL KHÔNG BLOCKING)
+// ==========================================
+// WiFiManager chỉ mở AP cấu hình khi user chủ động vào "Wifi Setting".
+// Khi BOOT thất bại, ESP32 KHÔNG tự phát AP cấu hình.
+WiFiManager wifiManager;
+bool wifiPortalActive = false;
+bool wifiExitConfirm = false;
+int wifiExitSelection = 0; // 0 = No (mặc định an toàn), 1 = Yes
+
+const unsigned long WIFI_BOOT_CONNECT_TIMEOUT_MS = 10000UL; // Chỉ chờ Wi-Fi cũ 10 giây khi BOOT
+
 // Khai báo trước hàm
 void printCentered(int row, String text);
 void drawScreen();
@@ -95,6 +121,11 @@ void trigger11Keys();
 void detachServoSafe(int index);
 void safeStopAll(); 
 void updateFirmwareFromInternet(); // Hàm HTTPS OTA
+void setupArduinoOTA();
+void startWifiSettingPortal();
+void stopWifiSettingPortalAndReturn();
+void drawWifiSettingScreen();
+void drawWifiExitConfirmScreen();
 
 void setup() {
   USB.VID(0x1720); 
@@ -165,48 +196,34 @@ void setup() {
   delay(3000); 
 
   // ==========================================================
-  // KHỞI TẠO WIFI BẰNG WIFIMANAGER (AUTO CONNECT / AP MODE)
+  // WIFI KHI BOOT
+  // - Chỉ thử kết nối Wi-Fi đã lưu.
+  // - Nếu không kết nối được: chạy Offline.
+  // - KHÔNG tự phát AP "ATE_Setup_WiFi" khi BOOT.
+  // - Muốn đổi/cấu hình Wi-Fi: user vào Function -> Wifi Setting.
   // ==========================================================
   lcd.clear();
   printCentered(0, "WIFI CONNECTION");
   lcd.setCursor(0, 1); lcd.print("Connecting...");
-  lcd.setCursor(0, 2); lcd.print("AP: ATE_Setup_WiFi");
 
-  WiFiManager wm;
-  // Cài đặt thời gian chờ 3 phút (180s). Hết giờ tự thoát để chạy Offline.
-  wm.setConfigPortalTimeout(180); 
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
+  WiFi.begin(); // Dùng SSID/password đã lưu trong NVS của ESP32
 
-  // Tự động kết nối mạng cũ, nếu không được thì mở trạm phát
-  bool connected = wm.autoConnect("ATE_Setup_WiFi");
+  unsigned long wifiStartMillis = millis();
+  while (WiFi.status() != WL_CONNECTED &&
+         millis() - wifiStartMillis < WIFI_BOOT_CONNECT_TIMEOUT_MS) {
+    delay(250);
+  }
 
-  if (connected) {
+  if (WiFi.status() == WL_CONNECTED) {
     lcd.clear();
     printCentered(0, "WIFI CONNECTED!");
-    lcd.setCursor(0, 1); lcd.print("IP:"); 
+    lcd.setCursor(0, 1); lcd.print("IP:");
     lcd.print(WiFi.localIP());
     delay(1500);
 
-    // CẤU HÌNH LOCAL OTA
-    ArduinoOTA.setHostname("ATE-Tool-System");
-    ArduinoOTA.onStart([]() {
-
-      lcd.clear();
-      printCentered(1, "LOCAL OTA UPDATING..");
-    });
-    ArduinoOTA.onEnd([]() {
-      lcd.clear();
-      printCentered(1, "UPDATE SUCCESS!");
-    });
-    ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
-      lcd.setCursor(0, 2);
-      lcd.print("Progress: ");
-      lcd.print((progress / (total / 100)));
-      lcd.print("%   ");
-    });
-    ArduinoOTA.begin();
-    delay(1500); 
-
-    // TỰ ĐỘNG CẬP NHẬT TỪ INTERNET KHI KẾT NỐI WIFI THÀNH CÔNG
+    setupArduinoOTA();
     updateFirmwareFromInternet();
 
   } else {
@@ -232,7 +249,25 @@ void setup() {
 }
 
 void loop() {
-  if (WiFi.status() == WL_CONNECTED) {
+  // WiFiManager portal chạy NON-BLOCKING để vẫn đọc được button OK/DOWN.
+  if (wifiPortalActive) {
+    wifiManager.process();
+
+    // Vì đã chủ động disconnect Wi-Fi cũ trước khi mở portal,
+    // WL_CONNECTED ở đây nghĩa là user đã chọn Wi-Fi và kết nối thành công.
+    if (!wifiExitConfirm && WiFi.status() == WL_CONNECTED) {
+      wifiPortalActive = false;
+      wifiManager.stopConfigPortal();
+
+      lcd.clear();
+      printCentered(1, "WiFi Updated!");
+      lcd.setCursor(0, 2); lcd.print("Rebooting...");
+      delay(2000);
+      ESP.restart();
+    }
+  }
+
+  if (WiFi.status() == WL_CONNECTED && !wifiPortalActive) {
     ArduinoOTA.handle(); 
   }
 
@@ -244,7 +279,7 @@ void loop() {
   bool minus = digitalRead(BTN_MINUS);
   bool run   = digitalRead(BTN_RUN);
 
-  if (run == LOW && lastRun == HIGH) {
+  if (!wifiPortalActive && run == LOW && lastRun == HIGH) {
     if (isRunning) {
       safeStopAll(); 
       isRunning = false; 
@@ -269,16 +304,47 @@ void loop() {
 
   // THUẬT TOÁN CUỘN TRANG CẬP NHẬT CHO 5 MỤC MENU
   if (down == LOW && lastDown == HIGH) {
-    if (currentScreen == 2) {
+    if (wifiPortalActive && wifiExitConfirm) {
+      // Ở màn hình xác nhận thoát WiFi Setting:
+      // DOWN dùng để đổi giữa No <-> Yes.
+      wifiExitSelection = (wifiExitSelection + 1) % 2;
+      drawWifiExitConfirmScreen();
+    }
+    else if (currentScreen == 2) {
       cursorIndex = (cursorIndex + 1) % 5; 
+      drawScreen();
     }
     else if (currentScreen >= 4 && currentScreen <= 6) {
       cursorIndex = (cursorIndex + 1) % 2; 
+      drawScreen();
     }
-    drawScreen(); delay(150);
+    delay(150);
   }
 
   if (ok == LOW && lastOk == HIGH) {
+    // ======================================================
+    // WIFI SETTING: OK -> hỏi có muốn thoát hay không
+    // ======================================================
+    if (wifiPortalActive) {
+      if (!wifiExitConfirm) {
+        wifiExitConfirm = true;
+        wifiExitSelection = 0; // Mặc định = No để tránh thoát nhầm.
+        drawWifiExitConfirmScreen();
+      } else {
+        if (wifiExitSelection == 1) {
+          // Yes -> đóng AP cấu hình và quay lại Function.
+          stopWifiSettingPortalAndReturn();
+        } else {
+          // No -> quay lại màn hình WiFi Setting, portal vẫn tiếp tục chạy.
+          wifiExitConfirm = false;
+          drawWifiSettingScreen();
+        }
+      }
+
+      delay(150);
+      goto UPDATE_STATE;
+    }
+
     if (currentScreen == 2) {
       if (cursorIndex == 0) {
         isRunning = true;
@@ -303,28 +369,10 @@ void loop() {
         // =======================================
         // CHỨC NĂNG ĐỔI WIFI TỪ MENU
         // =======================================
-        lcd.clear();
-        printCentered(0, "WIFI SETTING");
-        lcd.setCursor(0, 1); lcd.print("AP: ATE_Setup_WiFi");
-        lcd.setCursor(0, 2); lcd.print("IP: 192.168.4.1");
-        lcd.setCursor(0, 3); lcd.print("Wait for phone...");
-        
-        WiFiManager wm;
-        wm.setConfigPortalTimeout(180); // 3 phút để cài đặt
-        
-        // Mở cấu hình mạng ép buộc
-        if (wm.startConfigPortal("ATE_Setup_WiFi")) {
-            lcd.clear();
-            printCentered(1, "WiFi Updated!");
-            lcd.setCursor(0, 2); lcd.print("Rebooting...");
-            delay(2000);
-            ESP.restart(); // Khởi động lại để kết nối mạng mới
-        } else {
-            lcd.clear();
-            printCentered(1, "Timeout / Cancel");
-            delay(2000);
-            currentScreen = 2; cursorIndex = 4; 
-        }
+        // Không timeout. Portal chạy non-blocking để button OK/DOWN vẫn hoạt động.
+        startWifiSettingPortal();
+        delay(150);
+        goto UPDATE_STATE;
       }
     } 
     else if (currentScreen == 4) { currentScreen = 5; cursorIndex = 0; }
@@ -368,6 +416,112 @@ void loop() {
 
 UPDATE_STATE:
   lastOk = ok; lastDown = down; lastPlus = plus; lastMinus = minus; lastRun = run;
+}
+
+// ==========================================
+// LOCAL OTA SETUP
+// ==========================================
+void setupArduinoOTA() {
+  ArduinoOTA.setHostname("ATE-Tool-System");
+
+  ArduinoOTA.onStart([]() {
+    lcd.clear();
+    printCentered(1, "LOCAL OTA UPDATING..");
+  });
+
+  ArduinoOTA.onEnd([]() {
+    lcd.clear();
+    printCentered(1, "UPDATE SUCCESS!");
+  });
+
+  ArduinoOTA.onProgress([](unsigned int progress, unsigned int total) {
+    lcd.setCursor(0, 2);
+    lcd.print("Progress: ");
+    if (total > 0) {
+      lcd.print((progress * 100U) / total);
+    } else {
+      lcd.print(0);
+    }
+    lcd.print("%   ");
+  });
+
+  ArduinoOTA.begin();
+  delay(1500);
+}
+
+// ==========================================
+// WIFI SETTING - MỞ CONFIG PORTAL KHÔNG TIMEOUT
+// ==========================================
+void startWifiSettingPortal() {
+  isRunning = false;
+  isRunManually = false;
+
+  // Không cho Wi-Fi cũ tự reconnect trong lúc user đang cấu hình,
+  // nếu không code có thể hiểu nhầm Wi-Fi cũ là "WiFi Updated".
+  WiFi.setAutoReconnect(false);
+  WiFi.disconnect(false, false);
+  delay(200);
+
+  // Config Portal NON-BLOCKING:
+  // - Không setConfigPortalTimeout() => không timeout.
+  // - loop() gọi wifiManager.process().
+  // - Nhờ vậy vẫn đọc được button OK/DOWN trên thiết bị.
+  wifiManager.setConfigPortalBlocking(false);
+  wifiManager.startConfigPortal("ATE_Setup_WiFi");
+
+  wifiPortalActive = true;
+  wifiExitConfirm = false;
+  wifiExitSelection = 0;
+
+  drawWifiSettingScreen();
+}
+
+// ==========================================
+// WIFI SETTING - USER CHỌN YES ĐỂ THOÁT
+// ==========================================
+void stopWifiSettingPortalAndReturn() {
+  wifiManager.stopConfigPortal();
+  wifiPortalActive = false;
+  wifiExitConfirm = false;
+  wifiExitSelection = 0;
+
+  // Quay về STA mode và thử reconnect Wi-Fi đã lưu.
+  WiFi.mode(WIFI_STA);
+  WiFi.setAutoReconnect(true);
+  WiFi.begin();
+
+  currentScreen = 2;
+  cursorIndex = 4; // Quay lại đúng mục "Wifi Setting".
+  drawScreen();
+}
+
+// ==========================================
+// MÀN HÌNH WIFI SETTING
+// ==========================================
+void drawWifiSettingScreen() {
+  lcd.clear();
+  printCentered(0, "WIFI SETTING");
+  lcd.setCursor(0, 1); lcd.print("AP: ATE_Setup_WiFi");
+  lcd.setCursor(0, 2); lcd.print("IP: 192.168.4.1");
+  lcd.setCursor(0, 3); lcd.print("OK: Exit");
+}
+
+// ==========================================
+// MÀN HÌNH XÁC NHẬN THOÁT WIFI SETTING
+// ==========================================
+void drawWifiExitConfirmScreen() {
+  lcd.clear();
+  lcd.setCursor(0, 0); lcd.print("Exit WiFi Setting?");
+
+  lcd.setCursor(0, 1);
+  if (wifiExitSelection == 0) lcd.print("> No");
+  else                        lcd.print("  No");
+
+  lcd.setCursor(0, 2);
+  if (wifiExitSelection == 1) lcd.print("> Yes");
+  else                        lcd.print("  Yes");
+
+  lcd.setCursor(0, 3); lcd.print("DOWN Select OK Enter");
 }
 
 // ==========================================

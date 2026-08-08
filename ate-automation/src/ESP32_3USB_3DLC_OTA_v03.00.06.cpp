@@ -10,6 +10,9 @@
 //    Mặc định chọn No để tránh thoát nhầm.
 // 5) Khi user cấu hình Wi-Fi mới thành công -> hiện "WiFi Updated!"
 //    và ESP32 tự reboot.
+// 6) Khi phone mở http://192.168.4.1, portal tự chuyển thẳng đến
+//    http://192.168.4.1/wifi để hiện list Wi-Fi; bỏ qua trang Home
+//    có nút "Configure WiFi" (tránh browser tự đổi link sang HTTPS).
 // ============================================================
 
 #include <Arduino.h>
@@ -43,8 +46,8 @@
 //   02.01.02  -> 20102
 //   10.08.01  -> 100801
 
-const char* CURRENT_VERSION = "03.00.05";
-const uint32_t CURRENT_VERSION_CODE = 30005;
+const char* CURRENT_VERSION = "03.00.06";
+const uint32_t CURRENT_VERSION_CODE = 30006;
 
 const char* version_url = "https://smartcartech.vn/ate-automation/firmware/version.json"; 
 const char* base_bin_url = "https://smartcartech.vn/ate-automation/firmware/";
@@ -109,6 +112,17 @@ WiFiManager wifiManager;
 bool wifiPortalActive = false;
 bool wifiExitConfirm = false;
 int wifiExitSelection = 0; // 0 = No (mặc định an toàn), 1 = Yes
+
+// JavaScript được WiFiManager chèn vào <head> của portal.
+// Chỉ redirect khi đang ở trang root "/"; trang /wifi sẽ không redirect tiếp,
+// vì vậy không tạo vòng lặp. Dùng URL tuyệt đối HTTP để tránh browser
+// tự nâng link Configure WiFi thành HTTPS.
+const char WIFI_PORTAL_DIRECT_WIFI_PAGE[] =
+  "<script>"
+  "if(window.location.pathname==='/' ){"
+  "window.location.replace('http://192.168.4.1/wifi');"
+  "}"
+  "</script>";
 
 const unsigned long WIFI_BOOT_CONNECT_TIMEOUT_MS = 10000UL; // Chỉ chờ Wi-Fi cũ 10 giây khi BOOT
 
@@ -467,6 +481,12 @@ void startWifiSettingPortal() {
   // - loop() gọi wifiManager.process().
   // - Nhờ vậy vẫn đọc được button OK/DOWN trên thiết bị.
   wifiManager.setConfigPortalBlocking(false);
+
+  // Khi user mở 192.168.4.1, tự chuyển thẳng sang trang /wifi.
+  // Đây là workaround cho trường hợp browser trên phone đổi nút
+  // "Configure WiFi" thành https://192.168.4.1/wifi và gây lỗi.
+  wifiManager.setCustomHeadElement(WIFI_PORTAL_DIRECT_WIFI_PAGE);
+
   wifiManager.startConfigPortal("ATE_Setup_WiFi");
 
   wifiPortalActive = true;
@@ -502,7 +522,7 @@ void drawWifiSettingScreen() {
   lcd.clear();
   printCentered(0, "WIFI SETTING");
   lcd.setCursor(0, 1); lcd.print("AP: ATE_Setup_WiFi");
-  lcd.setCursor(0, 2); lcd.print("IP: 192.168.4.1");
+  lcd.setCursor(0, 2); lcd.print("Open: 192.168.4.1");
   lcd.setCursor(0, 3); lcd.print("OK: Exit");
 }
 

@@ -25,6 +25,12 @@
 //    - LittleFS mới: dừng audio -> đóng WAV -> LittleFS.end() -> update image.
 //    - Chỉ reboot một lần sau khi các update cần thiết hoàn tất.
 //    - Version filesystem đã cài được lưu trong EEPROM để không download lại mỗi boot.
+// 9) WEB UI V1 (LOCAL):
+//    - Web chạy trực tiếp trên ESP32-S3, truy cập qua http://<ATE-IP>/.
+//    - Static files nằm trong LittleFS: /web/index.html, /web/style.css, /web/app.js.
+//    - Dashboard realtime bằng REST polling, không dùng thư viện web ngoài.
+//    - Control web bị chặn khi Automation đang chạy đối với thao tác hardware manual.
+//    - Khi LittleFS OTA: WebServer dừng trước LittleFS.end(), reboot/remount an toàn.
 // ============================================================
 
 #include <Arduino.h>
@@ -48,6 +54,7 @@
 #include <Update.h>             // U_LITTLEFS / filesystem OTA target
 #include <ArduinoJson.h>        // Đọc file version.json
 #include <WiFiManager.h>        // THƯ VIỆN WIFIMANAGER
+#include <WebServer.h>           // Web UI local - built-in Arduino-ESP32 2.0.17
 
 // ==========================================
 // AUDIO - MAX98357A / I2S / LITTLEFS
@@ -70,8 +77,8 @@
 //   02.01.02  -> 20102
 //   10.08.01  -> 100801
 
-const char* CURRENT_VERSION = "03.00.09";
-const uint32_t CURRENT_VERSION_CODE = 30009;
+const char* CURRENT_VERSION = "04.00.01";
+const uint32_t CURRENT_VERSION_CODE = 40001;
 
 // Filesystem version KHÔNG thể chỉ dùng const trong firmware, vì LittleFS có thể
 // được update độc lập với firmware. Giá trị thực tế đã cài sẽ được lưu EEPROM.
@@ -81,6 +88,35 @@ uint32_t installedFsVersionCode = FACTORY_FS_VERSION_CODE;
 
 const char* version_url = "https://smartcartech.vn/ate-automation/firmware/version.json"; 
 const char* base_bin_url = "https://smartcartech.vn/ate-automation/firmware/";
+
+
+// ==========================================
+// WEB UI V1 - LOCAL CONTROL / DASHBOARD
+// ==========================================
+// Web UI chạy trên ESP32 trong LAN. smartcartech.vn chỉ dùng làm OTA server.
+// Truy cập: http://<IP-hiển-thị-trên-LCD>/ hoặc http://ate-tool-system.local/
+const char* ATE_STATION_NAME = "ATE-01";
+const uint16_t ATE_WEB_PORT = 80;
+
+WebServer ateWeb(ATE_WEB_PORT);
+bool webRoutesConfigured = false;
+bool webServerStarted = false;
+
+enum WebPendingAction : uint8_t {
+  WEB_ACTION_NONE = 0,
+  WEB_ACTION_START_WIFI_PORTAL,
+  WEB_ACTION_HTTPS_OTA
+};
+
+volatile WebPendingAction pendingWebAction = WEB_ACTION_NONE;
+unsigned long pendingWebActionMillis = 0;
+const uint32_t WEB_DEFERRED_ACTION_DELAY_MS = 400UL;
+
+const char WEB_FALLBACK_HTML[] PROGMEM = R"HTML(
+<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ATE Automation</title><style>body{font-family:Arial,sans-serif;background:#111827;color:#f9fafb;margin:0;padding:28px}main{max-width:720px;margin:auto;background:#1f2937;padding:24px;border-radius:16px}code{background:#111827;padding:2px 6px;border-radius:6px}.ok{color:#34d399}</style></head>
+<body><main><h2>ATE Automation Web</h2><p>ESP32 WebServer is running, but the LittleFS web assets are not available.</p><p>Put the files in <code>data/web/</code>, build the complete LittleFS image (including <code>data/voice/</code>), then upload/update the filesystem.</p><p class="ok">API status is still available at <code>/api/status</code>.</p></main></body></html>
+)HTML";
 
 // Tự tay khai báo cổng USB Serial
 USBCDC USBSerial;
@@ -231,6 +267,23 @@ void stopWifiSettingPortalAndReturn();
 void drawWifiSettingScreen();
 void drawWifiExitConfirmScreen();
 
+// Web UI V1
+void setupAteWebServer();
+void stopAteWebServer();
+void configureAteWebRoutes();
+void processPendingWebAction();
+void serveAteWebFile(const char* path, const char* contentType);
+void sendWebJson(int httpCode, JsonDocument& doc);
+void sendWebMessage(int httpCode, const char* status, const char* message);
+bool parseWebJson(JsonDocument& doc);
+bool webManualControlAllowed();
+String webModeName();
+String webStepName();
+bool fetchOtaManifestForWeb(String& fwVersion, uint32_t& fwCode, String& fsVersion, uint32_t& fsCode, String& errorText);
+void webStartPcMode();
+void webStartManualMode(bool skipKeyTest);
+void webStopAutomation();
+
 // Audio
 void setupAudio();
 void audioTask(void* parameter);
@@ -358,6 +411,7 @@ void setup() {
 
     setupArduinoOTA();
     updateFirmwareFromInternet();
+    setupAteWebServer();
 
   } else {
     lcd.clear();
@@ -403,6 +457,19 @@ void loop() {
       ESP.restart();
     }
   }
+
+  // WebServer tự start/restart khi STA Wi-Fi sẵn sàng. Điều này cũng cover
+  // trường hợp user thoát WiFi Setting mà không reboot, hoặc FS OTA lỗi rồi remount.
+  if (!webServerStarted && WiFi.status() == WL_CONNECTED && !wifiPortalActive && !localOtaInProgress) {
+    setupAteWebServer();
+  }
+
+  if (webServerStarted && WiFi.status() == WL_CONNECTED && !wifiPortalActive && !localOtaInProgress) {
+    ateWeb.handleClient();
+  }
+
+  // Các action làm mất connection/reboot được defer để HTTP response kịp gửi về browser.
+  processPendingWebAction();
 
   if (WiFi.status() == WL_CONNECTED && !wifiPortalActive) {
     ArduinoOTA.handle(); 
@@ -585,6 +652,559 @@ void loop() {
 
 UPDATE_STATE:
   lastOk = ok; lastDown = down; lastPlus = plus; lastMinus = minus; lastRun = run;
+}
+
+
+// ==========================================
+// WEB UI V1 - LOCAL DASHBOARD / CONTROL
+// ==========================================
+String webModeName() {
+  if (!isRunning) return "STOPPED";
+  if (!isRunManually) return "PC";
+  return skipManualKeyTest ? "AUTO2" : "AUTO";
+}
+
+String webStepName() {
+  if (wifiPortalActive) return "WiFi Setting";
+  if (localOtaInProgress) return localOtaFilesystemUpdate ? "Local Filesystem OTA" : "Local Firmware OTA";
+  if (!isRunning) return "Stopped";
+
+  if (!isRunManually) {
+    if (runStep == 6) return "Waiting PC Command";
+    if (runStep >= 7 && runStep <= 9) return "Changing Tool";
+    return "PC Command";
+  }
+
+  switch (runStep) {
+    case 2:  return "Wait Disconnect";
+    case 3:  return "USB Connecting";
+    case 4:  return "USB Connected";
+    case 5:  return "DLC Connecting";
+    case 6:  return skipManualKeyTest ? "Delay Connect" : "Waiting Key Test";
+    case 61: return "Key Test Complete";
+    case 7:
+    case 8:
+    case 9:  return "Changing Tool";
+    default: return "Running";
+  }
+}
+
+void sendWebJson(int httpCode, JsonDocument& doc) {
+  String body;
+  serializeJson(doc, body);
+  ateWeb.sendHeader("Cache-Control", "no-store");
+  ateWeb.send(httpCode, "application/json", body);
+}
+
+void sendWebMessage(int httpCode, const char* status, const char* message) {
+  JsonDocument doc;
+  doc["status"] = status;
+  doc["message"] = message;
+  sendWebJson(httpCode, doc);
+}
+
+bool parseWebJson(JsonDocument& doc) {
+  if (!ateWeb.hasArg("plain")) return false;
+  DeserializationError err = deserializeJson(doc, ateWeb.arg("plain"));
+  return !err;
+}
+
+bool webManualControlAllowed() {
+  return !isRunning && !wifiPortalActive && !localOtaInProgress && pendingWebAction == WEB_ACTION_NONE;
+}
+
+void serveAteWebFile(const char* path, const char* contentType) {
+  if (!audioFSReady) {
+    if (strcmp(path, "/web/index.html") == 0) {
+      ateWeb.send_P(200, "text/html", WEB_FALLBACK_HTML);
+    } else {
+      ateWeb.send(404, "text/plain", "LittleFS is not mounted");
+    }
+    return;
+  }
+
+  File f = LittleFS.open(path, "r");
+  if (!f) {
+    if (strcmp(path, "/web/index.html") == 0) {
+      ateWeb.send_P(200, "text/html", WEB_FALLBACK_HTML);
+    } else {
+      ateWeb.send(404, "text/plain", "Web asset not found");
+    }
+    return;
+  }
+
+  ateWeb.sendHeader("Cache-Control", "no-cache");
+  ateWeb.streamFile(f, contentType);
+  f.close();
+}
+
+void webStartPcMode() {
+  isRunning = true;
+  isRunManually = false;
+  skipManualKeyTest = false;
+  currentPair = 0;
+  runStep = 6;
+
+  lcd.clear();
+  printCentered(0, "SYSTEM RUN (PC)");
+  lcd.setCursor(0, 1); lcd.print("Tool: 1");
+  lcd.setCursor(0, 2); lcd.print("Waiting PC Command..");
+  lcd.setCursor(0, 3); lcd.print("Press RUN to Stop");
+}
+
+void webStartManualMode(bool skipKeyTest) {
+  isRunning = true;
+  isRunManually = true;
+  skipManualKeyTest = skipKeyTest;
+  currentPair = 0;
+  runStep = 2;
+  previousMillis = millis();
+
+  lcd.clear();
+  if (skipManualKeyTest) printCentered(0, "SYSTEM RUN (AUTO2)");
+  else                   printCentered(0, "SYSTEM RUN (AUTO)");
+  lcd.setCursor(0, 1); lcd.print("Tool: 1");
+  lcd.setCursor(0, 2); lcd.print("Wait Disconnect...  ");
+  lcd.setCursor(0, 3); lcd.print("Press RUN to Stop");
+
+  if (skipManualKeyTest) queueVoice(VOICE_AUTO_SKIP_KEY);
+  else                   queueVoice(VOICE_AUTO_WITH_KEY);
+  queueToolVoice(0);
+}
+
+void webStopAutomation() {
+  if (isRunning) {
+    safeStopAll();
+    queueVoice(VOICE_AUTOMATION_STOPPED);
+  }
+  isRunning = false;
+  isRunManually = false;
+  skipManualKeyTest = false;
+  currentScreen = 2;
+  cursorIndex = 0;
+  drawScreen();
+}
+
+bool fetchOtaManifestForWeb(String& fwVersion, uint32_t& fwCode, String& fsVersion, uint32_t& fsCode, String& errorText) {
+  fwVersion = "";
+  fsVersion = "";
+  fwCode = 0;
+  fsCode = 0;
+  errorText = "";
+
+  if (WiFi.status() != WL_CONNECTED) {
+    errorText = "WiFi not connected";
+    return false;
+  }
+
+  WiFiClientSecure client;
+  client.setInsecure();
+  client.setTimeout(12000);
+
+  HTTPClient http;
+  if (!http.begin(client, version_url)) {
+    errorText = "Cannot open version URL";
+    return false;
+  }
+
+  int code = http.GET();
+  if (code != HTTP_CODE_OK) {
+    errorText = "HTTP " + String(code);
+    http.end();
+    return false;
+  }
+
+  String payload = http.getString();
+  http.end();
+
+  JsonDocument doc;
+  if (deserializeJson(doc, payload)) {
+    errorText = "Invalid version.json";
+    return false;
+  }
+
+  fwVersion = String((const char*)(doc["firmware"]["version"] | ""));
+  fwCode = doc["firmware"]["version_code"] | 0;
+  fsVersion = String((const char*)(doc["filesystem"]["version"] | ""));
+  fsCode = doc["filesystem"]["version_code"] | 0;
+
+  if (fwVersion.length() == 0 || fwCode == 0 || fsVersion.length() == 0 || fsCode == 0) {
+    errorText = "Manifest missing firmware/filesystem fields";
+    return false;
+  }
+
+  return true;
+}
+
+void configureAteWebRoutes() {
+  if (webRoutesConfigured) return;
+
+  ateWeb.on("/", HTTP_GET, []() {
+    serveAteWebFile("/web/index.html", "text/html");
+  });
+  ateWeb.on("/style.css", HTTP_GET, []() {
+    serveAteWebFile("/web/style.css", "text/css");
+  });
+  ateWeb.on("/app.js", HTTP_GET, []() {
+    serveAteWebFile("/web/app.js", "application/javascript");
+  });
+  ateWeb.on("/favicon.ico", HTTP_GET, []() {
+    ateWeb.send(204, "text/plain", "");
+  });
+
+  // -------------------- STATUS --------------------
+  ateWeb.on("/api/status", HTTP_GET, []() {
+    JsonDocument doc;
+    doc["station"] = ATE_STATION_NAME;
+    doc["running"] = isRunning;
+    doc["mode"] = webModeName();
+    doc["tool"] = currentPair + 1;
+    doc["step"] = webStepName();
+    doc["run_step"] = runStep;
+    doc["fw_version"] = CURRENT_VERSION;
+    doc["fw_version_code"] = CURRENT_VERSION_CODE;
+    doc["fs_version"] = versionCodeToName(installedFsVersionCode);
+    doc["fs_version_code"] = installedFsVersionCode;
+    doc["wifi_connected"] = (WiFi.status() == WL_CONNECTED);
+    doc["ssid"] = (WiFi.status() == WL_CONNECTED) ? WiFi.SSID() : "";
+    doc["rssi"] = (WiFi.status() == WL_CONNECTED) ? WiFi.RSSI() : 0;
+    doc["ip"] = (WiFi.status() == WL_CONNECTED) ? WiFi.localIP().toString() : "0.0.0.0";
+    doc["uptime_s"] = millis() / 1000UL;
+    doc["littlefs_ready"] = audioFSReady;
+    doc["audio_ready"] = audioI2SReady;
+    doc["wifi_portal_active"] = wifiPortalActive;
+    doc["local_ota"] = localOtaInProgress;
+    sendWebJson(200, doc);
+  });
+
+  // -------------------- RUN CONTROL --------------------
+  ateWeb.on("/api/run", HTTP_POST, []() {
+    if (wifiPortalActive || localOtaInProgress || pendingWebAction != WEB_ACTION_NONE) {
+      sendWebMessage(409, "busy", "ATE is busy with WiFi/OTA operation");
+      return;
+    }
+    if (isRunning) {
+      sendWebMessage(409, "busy", "Stop the current mode before starting another mode");
+      return;
+    }
+
+    JsonDocument req;
+    if (!parseWebJson(req)) {
+      sendWebMessage(400, "error", "Invalid JSON body");
+      return;
+    }
+
+    String mode = String((const char*)(req["mode"] | ""));
+    mode.toLowerCase();
+
+    if (mode == "pc") webStartPcMode();
+    else if (mode == "auto") webStartManualMode(false);
+    else if (mode == "auto2") webStartManualMode(true);
+    else {
+      sendWebMessage(400, "error", "mode must be pc, auto or auto2");
+      return;
+    }
+
+    sendWebMessage(200, "ok", "Automation started");
+  });
+
+  ateWeb.on("/api/stop", HTTP_POST, []() {
+    if (wifiPortalActive || localOtaInProgress) {
+      sendWebMessage(409, "busy", "ATE is busy with WiFi/OTA operation");
+      return;
+    }
+    webStopAutomation();
+    sendWebMessage(200, "ok", "Automation stopped");
+  });
+
+  // -------------------- MANUAL HARDWARE --------------------
+  ateWeb.on("/api/manual/usb", HTTP_POST, []() {
+    if (!webManualControlAllowed()) {
+      sendWebMessage(409, "busy", "Stop Automation before manual hardware control");
+      return;
+    }
+
+    JsonDocument req;
+    if (!parseWebJson(req)) {
+      sendWebMessage(400, "error", "Invalid JSON body");
+      return;
+    }
+
+    int tool = req["tool"] | 0;
+    String action = String((const char*)(req["action"] | ""));
+    action.toLowerCase();
+    if (tool < 1 || tool > 3 || (action != "connect" && action != "disconnect")) {
+      sendWebMessage(400, "error", "Invalid tool/action");
+      return;
+    }
+
+    int idx = tool - 1;
+    usbServos[idx].attach(USB_SERVO_PINS[idx]);
+    usbServos[idx].write(action == "connect" ? usbAngleB[idx] : usbAngleA[idx]);
+    delay(600);
+    detachServoSafe(idx);
+    sendWebMessage(200, "ok", "USB actuator command completed");
+  });
+
+  ateWeb.on("/api/manual/dlc", HTTP_POST, []() {
+    if (!webManualControlAllowed()) {
+      sendWebMessage(409, "busy", "Stop Automation before manual hardware control");
+      return;
+    }
+
+    JsonDocument req;
+    if (!parseWebJson(req)) {
+      sendWebMessage(400, "error", "Invalid JSON body");
+      return;
+    }
+
+    int tool = req["tool"] | 0;
+    String action = String((const char*)(req["action"] | ""));
+    action.toLowerCase();
+    if (tool < 1 || tool > 3 || (action != "connect" && action != "disconnect")) {
+      sendWebMessage(400, "error", "Invalid tool/action");
+      return;
+    }
+
+    int idx = tool - 1;
+    mcp.digitalWrite(DLC_RELAY_PINS[idx], action == "connect" ? LOW : HIGH);
+    sendWebMessage(200, "ok", "DLC relay command completed");
+  });
+
+  ateWeb.on("/api/manual/key", HTTP_POST, []() {
+    if (!webManualControlAllowed()) {
+      sendWebMessage(409, "busy", "Stop Automation before manual key control");
+      return;
+    }
+
+    JsonDocument req;
+    if (!parseWebJson(req)) {
+      sendWebMessage(400, "error", "Invalid JSON body");
+      return;
+    }
+
+    bool allKeys = req["all"] | false;
+    if (allKeys) {
+      trigger11Keys();
+      sendWebMessage(200, "ok", "All 11 keys tested");
+      return;
+    }
+
+    int key = req["key"] | 0;
+    if (key < 1 || key > 11) {
+      sendWebMessage(400, "error", "key must be 1..11");
+      return;
+    }
+
+    int pin = key - 1;
+    mcp.digitalWrite(pin, LOW); delay(200);
+    mcp.digitalWrite(pin, HIGH); delay(200);
+    sendWebMessage(200, "ok", "Key tested");
+  });
+
+  ateWeb.on("/api/audio/test", HTTP_POST, []() {
+    if (!audioFSReady) {
+      sendWebMessage(503, "error", "LittleFS/voice is not ready");
+      return;
+    }
+    queueVoice(VOICE_SYSTEM_READY);
+    sendWebMessage(200, "ok", "Voice test queued");
+  });
+
+  // -------------------- CONFIG / CALIBRATION --------------------
+  ateWeb.on("/api/config", HTTP_GET, []() {
+    JsonDocument doc;
+    JsonArray a = doc["usbAngleA"].to<JsonArray>();
+    JsonArray b = doc["usbAngleB"].to<JsonArray>();
+    for (int i = 0; i < 3; i++) {
+      a.add(usbAngleA[i]);
+      b.add(usbAngleB[i]);
+    }
+    doc["delayDisconnect"] = delayDisconnect;
+    doc["delayConnect"] = delayConnect;
+    sendWebJson(200, doc);
+  });
+
+  ateWeb.on("/api/config", HTTP_POST, []() {
+    if (isRunning || wifiPortalActive || localOtaInProgress) {
+      sendWebMessage(409, "busy", "Stop Automation before changing configuration");
+      return;
+    }
+
+    JsonDocument req;
+    if (!parseWebJson(req)) {
+      sendWebMessage(400, "error", "Invalid JSON body");
+      return;
+    }
+
+    JsonArray a = req["usbAngleA"].as<JsonArray>();
+    JsonArray b = req["usbAngleB"].as<JsonArray>();
+    int newDelayD = req["delayDisconnect"] | -1;
+    int newDelayC = req["delayConnect"] | -1;
+
+    if (a.size() != 3 || b.size() != 3 || newDelayD < 0 || newDelayD > 1000 || newDelayC < 8 || newDelayC > 1000) {
+      sendWebMessage(400, "error", "Invalid calibration/delay values");
+      return;
+    }
+
+    for (int i = 0; i < 3; i++) {
+      int va = a[i] | -1;
+      int vb = b[i] | -1;
+      if (va < 0 || va > 180 || vb < 0 || vb > 180) {
+        sendWebMessage(400, "error", "Servo angle must be 0..180");
+        return;
+      }
+      usbAngleA[i] = va;
+      usbAngleB[i] = vb;
+    }
+
+    delayDisconnect = newDelayD;
+    delayConnect = newDelayC;
+
+    for (int i = 0; i < 3; i++) {
+      EEPROM.put(addrUsbA[i], usbAngleA[i]);
+      EEPROM.put(addrUsbB[i], usbAngleB[i]);
+    }
+    EEPROM.put(addrTimeD, delayDisconnect);
+    EEPROM.put(addrTimeC, delayConnect);
+    EEPROM.commit();
+
+    sendWebMessage(200, "ok", "Configuration saved to EEPROM");
+  });
+
+  ateWeb.on("/api/calibration/move", HTTP_POST, []() {
+    if (!webManualControlAllowed()) {
+      sendWebMessage(409, "busy", "Stop Automation before calibration move");
+      return;
+    }
+
+    JsonDocument req;
+    if (!parseWebJson(req)) {
+      sendWebMessage(400, "error", "Invalid JSON body");
+      return;
+    }
+
+    int tool = req["tool"] | 0;
+    int angle = req["angle"] | -1;
+    if (tool < 1 || tool > 3 || angle < 0 || angle > 180) {
+      sendWebMessage(400, "error", "Invalid tool/angle");
+      return;
+    }
+
+    int idx = tool - 1;
+    usbServos[idx].attach(USB_SERVO_PINS[idx]);
+    usbServos[idx].write(angle);
+    delay(600);
+    detachServoSafe(idx);
+    sendWebMessage(200, "ok", "Servo moved");
+  });
+
+  // -------------------- WIFI --------------------
+  ateWeb.on("/api/wifi/setup", HTTP_POST, []() {
+    if (isRunning || localOtaInProgress || pendingWebAction != WEB_ACTION_NONE) {
+      sendWebMessage(409, "busy", "Stop Automation before starting WiFi Setup");
+      return;
+    }
+    pendingWebAction = WEB_ACTION_START_WIFI_PORTAL;
+    pendingWebActionMillis = millis();
+    sendWebMessage(202, "accepted", "WiFi Setup AP will start. Connect phone to ATE_Setup_WiFi.");
+  });
+
+  // -------------------- HTTPS OTA --------------------
+  ateWeb.on("/api/update/check", HTTP_GET, []() {
+    String fwVersion, fsVersion, errorText;
+    uint32_t fwCode = 0, fsCode = 0;
+    if (!fetchOtaManifestForWeb(fwVersion, fwCode, fsVersion, fsCode, errorText)) {
+      JsonDocument doc;
+      doc["status"] = "error";
+      doc["message"] = errorText;
+      sendWebJson(502, doc);
+      return;
+    }
+
+    JsonDocument doc;
+    doc["status"] = "ok";
+    doc["current_fw"] = CURRENT_VERSION;
+    doc["current_fw_code"] = CURRENT_VERSION_CODE;
+    doc["server_fw"] = fwVersion;
+    doc["server_fw_code"] = fwCode;
+    doc["fw_update_available"] = (fwCode > CURRENT_VERSION_CODE);
+    doc["current_fs"] = versionCodeToName(installedFsVersionCode);
+    doc["current_fs_code"] = installedFsVersionCode;
+    doc["server_fs"] = fsVersion;
+    doc["server_fs_code"] = fsCode;
+    doc["fs_update_available"] = (fsCode > installedFsVersionCode);
+    sendWebJson(200, doc);
+  });
+
+  ateWeb.on("/api/update/start", HTTP_POST, []() {
+    if (isRunning || wifiPortalActive || localOtaInProgress || pendingWebAction != WEB_ACTION_NONE) {
+      sendWebMessage(409, "busy", "Stop Automation before HTTPS OTA");
+      return;
+    }
+    if (WiFi.status() != WL_CONNECTED) {
+      sendWebMessage(503, "error", "WiFi not connected");
+      return;
+    }
+    pendingWebAction = WEB_ACTION_HTTPS_OTA;
+    pendingWebActionMillis = millis();
+    sendWebMessage(202, "accepted", "HTTPS OTA check/update will start. Device may reboot.");
+  });
+
+  ateWeb.onNotFound([]() {
+    if (ateWeb.uri().startsWith("/api/")) {
+      sendWebMessage(404, "error", "API endpoint not found");
+    } else {
+      serveAteWebFile("/web/index.html", "text/html");
+    }
+  });
+
+  webRoutesConfigured = true;
+}
+
+void setupAteWebServer() {
+  if (webServerStarted || WiFi.status() != WL_CONNECTED || wifiPortalActive || localOtaInProgress) return;
+
+  configureAteWebRoutes();
+  ateWeb.begin();
+  webServerStarted = true;
+
+  // ArduinoOTA đã khởi tạo mDNS với hostname ATE-Tool-System.
+  // Add HTTP service để browser có thể thử http://ate-tool-system.local/.
+  MDNS.addService("http", "tcp", ATE_WEB_PORT);
+
+  USBSerial.print("[WEB] ATE UI started: http://");
+  USBSerial.print(WiFi.localIP());
+  USBSerial.println("/");
+}
+
+void stopAteWebServer() {
+  if (!webServerStarted) return;
+  ateWeb.stop();
+  webServerStarted = false;
+  USBSerial.println("[WEB] WebServer stopped");
+}
+
+void processPendingWebAction() {
+  if (pendingWebAction == WEB_ACTION_NONE) return;
+  if (millis() - pendingWebActionMillis < WEB_DEFERRED_ACTION_DELAY_MS) return;
+
+  WebPendingAction action = pendingWebAction;
+  pendingWebAction = WEB_ACTION_NONE;
+
+  if (action == WEB_ACTION_START_WIFI_PORTAL) {
+    stopAteWebServer();
+    startWifiSettingPortal();
+    return;
+  }
+
+  if (action == WEB_ACTION_HTTPS_OTA) {
+    updateFirmwareFromInternet();
+    // Nếu không update hoặc update fail nhưng không reboot, đảm bảo web trở lại.
+    if (WiFi.status() == WL_CONNECTED && !wifiPortalActive && !localOtaInProgress) {
+      setupAteWebServer();
+    }
+  }
 }
 
 // ==========================================
@@ -1561,6 +2181,9 @@ bool pauseAudioAndUnmountLittleFSForOta() {
   }
 
   // Chỉ unmount sau khi audio task đã xác nhận không còn giữ WAV mở.
+  // Web UI cũng đọc static assets từ LittleFS, vì vậy phải dừng WebServer trước.
+  stopAteWebServer();
+
   if (audioFSReady) {
     LittleFS.end();
     audioFSReady = false;
@@ -1589,6 +2212,11 @@ void resumeAudioAfterFilesystemOtaError() {
   unsigned long startWait = millis();
   while (audioFsOtaPaused && (millis() - startWait < 500UL)) {
     delay(5);
+  }
+
+  // Web vẫn có thể chạy cả khi FS mount fail (sẽ hiện fallback page + API status).
+  if (WiFi.status() == WL_CONNECTED && !wifiPortalActive && !localOtaInProgress) {
+    setupAteWebServer();
   }
 
   if (audioFSReady) queueVoice(VOICE_OTA_FAILED);

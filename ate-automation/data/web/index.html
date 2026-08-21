@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#0b1020">
+  <title>ATE Automation</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <div class="shell">
+    <aside class="sidebar">
+      <div class="brand">
+        <div class="brand-mark">ATE</div>
+        <div>
+          <strong>INNOVA Automation</strong>
+          <span id="stationName">ATE-01</span>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="Main navigation">
+        <button class="nav-item active" data-page="dashboard"><span>01</span>Dashboard</button>
+        <button class="nav-item" data-page="run"><span>02</span>Run Control</button>
+        <button class="nav-item" data-page="manual"><span>03</span>Manual Control</button>
+        <button class="nav-item" data-page="calibration"><span>04</span>Calibration</button>
+        <button class="nav-item" data-page="wifi"><span>05</span>Wi-Fi</button>
+        <button class="nav-item" data-page="update"><span>06</span>Update</button>
+      </nav>
+
+      <div class="sidebar-foot">
+        <div class="connection-line"><i id="sidebarDot" class="dot"></i><span id="sidebarConnection">Connecting…</span></div>
+        <small>Local ATE control</small>
+      </div>
+    </aside>
+
+    <main class="main">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">ATE CONTROL CENTER</p>
+          <h1 id="pageTitle">Dashboard</h1>
+        </div>
+        <div class="top-status">
+          <span id="topIp" class="mono">--</span>
+          <span id="onlinePill" class="pill neutral">OFFLINE</span>
+        </div>
+      </header>
+
+      <section class="page active" id="page-dashboard">
+        <div class="hero-grid">
+          <article class="hero-card">
+            <div class="hero-head">
+              <span>System State</span>
+              <span id="runBadge" class="pill neutral">--</span>
+            </div>
+            <div class="hero-mode" id="modeValue">--</div>
+            <div class="hero-tool">TOOL <strong id="toolValue">-</strong></div>
+            <div class="hero-step" id="stepValue">Waiting for status…</div>
+            <div class="hero-actions">
+              <button class="btn danger" id="dashboardStop">STOP AUTOMATION</button>
+              <button class="btn secondary" data-go="run">Run Control</button>
+            </div>
+          </article>
+
+          <div class="metrics-grid">
+            <article class="metric"><span>Firmware</span><strong id="fwValue">--</strong><small>Application</small></article>
+            <article class="metric"><span>Filesystem</span><strong id="fsValue">--</strong><small>Web + Voice</small></article>
+            <article class="metric"><span>Wi-Fi</span><strong id="rssiValue">--</strong><small id="ssidValue">--</small></article>
+            <article class="metric"><span>Uptime</span><strong id="uptimeValue">--</strong><small>Since last boot</small></article>
+          </div>
+        </div>
+
+        <div class="two-col">
+          <article class="panel">
+            <div class="panel-head"><div><p class="eyebrow">HEALTH</p><h2>System Health</h2></div></div>
+            <div class="health-list">
+              <div><span>ESP32 / Web</span><b id="healthWeb" class="health neutral">CHECKING</b></div>
+              <div><span>LittleFS</span><b id="healthFs" class="health neutral">CHECKING</b></div>
+              <div><span>MAX98357A / I2S</span><b id="healthAudio" class="health neutral">CHECKING</b></div>
+              <div><span>Wi-Fi STA</span><b id="healthWifi" class="health neutral">CHECKING</b></div>
+            </div>
+          </article>
+
+          <article class="panel">
+            <div class="panel-head">
+              <div><p class="eyebrow">LIVE</p><h2>Recent Activity</h2></div>
+              <button class="text-btn" id="clearActivity">Clear</button>
+            </div>
+            <div id="activityLog" class="activity-log"><div class="empty">Activity will appear here.</div></div>
+          </article>
+        </div>
+      </section>
+
+      <section class="page" id="page-run">
+        <div class="section-intro"><div><p class="eyebrow">OPERATING MODE</p><h2>Run Control</h2><p>Stop the current mode before starting another mode. This mirrors the safe LCD workflow.</p></div></div>
+        <div class="mode-grid">
+          <article class="mode-card"><span class="mode-code">PC</span><h3>PC Mode</h3><p>Wait for commands from the PC AutoTest application.</p><button class="btn primary run-mode" data-mode="pc">START PC MODE</button></article>
+          <article class="mode-card"><span class="mode-code">AUTO</span><h3>Include Key Test</h3><p>Manual automatic cycle with the existing 11-key test sequence.</p><button class="btn primary run-mode" data-mode="auto">START AUTO</button></article>
+          <article class="mode-card"><span class="mode-code">AUTO2</span><h3>Skip Key Test</h3><p>Manual automatic cycle without the 11-key test sequence.</p><button class="btn primary run-mode" data-mode="auto2">START AUTO2</button></article>
+        </div>
+        <article class="panel stop-panel"><div><strong>Emergency / Operator Stop</strong><p>Returns relays and USB actuators to their safe stop state.</p></div><button class="btn danger" id="runStop">STOP AUTOMATION</button></article>
+      </section>
+
+      <section class="page" id="page-manual">
+        <div class="section-intro"><div><p class="eyebrow">ENGINEERING</p><h2>Manual Hardware Control</h2><p>Available only while Automation is stopped.</p></div><span id="manualLock" class="pill neutral">CHECKING</span></div>
+        <div class="tool-grid" id="toolControls"></div>
+
+        <article class="panel key-panel">
+          <div class="panel-head"><div><p class="eyebrow">MCP23017</p><h2>Key Test</h2></div></div>
+          <div id="keyGrid" class="key-grid"></div>
+          <button class="btn secondary wide" id="testAllKeys">TEST ALL 11 KEYS</button>
+        </article>
+
+        <article class="panel audio-panel">
+          <div><p class="eyebrow">AUDIO</p><h2>Speaker Check</h2><p>Queues the existing “System Ready” voice file. No web-triggered beep is used.</p></div>
+          <button class="btn secondary" id="testVoice">TEST VOICE</button>
+        </article>
+      </section>
+
+      <section class="page" id="page-calibration">
+        <div class="section-intro"><div><p class="eyebrow">SETUP</p><h2>Servo Calibration & Timing</h2><p>Preview angles first, then save the final values to EEPROM.</p></div></div>
+        <div id="calibrationTools" class="calibration-grid"></div>
+        <article class="panel delay-panel">
+          <div class="field"><label for="delayDisconnect">Delay Disconnect</label><div class="input-unit"><input id="delayDisconnect" type="number" min="0" max="1000"><span>sec</span></div></div>
+          <div class="field"><label for="delayConnect">Delay Connect</label><div class="input-unit"><input id="delayConnect" type="number" min="8" max="1000"><span>sec</span></div></div>
+          <button class="btn primary" id="saveConfig">SAVE SETTINGS</button>
+        </article>
+      </section>
+
+      <section class="page" id="page-wifi">
+        <div class="section-intro"><div><p class="eyebrow">NETWORK</p><h2>Wi-Fi</h2><p>Monitor the current STA connection or switch the ATE into its existing configuration AP mode.</p></div></div>
+        <div class="network-card">
+          <div class="network-ring"><span id="wifiRssiBig">--</span><small>dBm</small></div>
+          <div class="network-info">
+            <div><span>SSID</span><strong id="wifiSsidBig">--</strong></div>
+            <div><span>IP Address</span><strong id="wifiIpBig" class="mono">--</strong></div>
+            <div><span>Status</span><strong id="wifiStatusBig">--</strong></div>
+          </div>
+        </div>
+        <article class="panel warning-panel">
+          <div><strong>Start Wi-Fi Setup AP</strong><p>The current web connection will close. Connect your phone to <b>ATE_Setup_WiFi</b>, then open <b>192.168.4.1</b>.</p></div>
+          <button class="btn secondary" id="startWifiSetup">START CONFIG AP</button>
+        </article>
+      </section>
+
+      <section class="page" id="page-update">
+        <div class="section-intro"><div><p class="eyebrow">SMARTCARTECH.VN</p><h2>Firmware & Filesystem OTA</h2><p>Checks the existing HTTPS manifest and can update firmware plus the complete LittleFS image.</p></div></div>
+        <div class="update-grid">
+          <article class="version-card"><span>Firmware</span><div><strong id="updateCurrentFw">--</strong><i>Current</i></div><div><strong id="updateServerFw">Not checked</strong><i>Server</i></div><b id="fwUpdateState" class="pill neutral">CHECK FIRST</b></article>
+          <article class="version-card"><span>Filesystem</span><div><strong id="updateCurrentFs">--</strong><i>Current Web + Voice</i></div><div><strong id="updateServerFs">Not checked</strong><i>Server</i></div><b id="fsUpdateState" class="pill neutral">CHECK FIRST</b></article>
+        </div>
+        <article class="panel update-actions">
+          <div><strong>HTTPS OTA</strong><p>Filesystem update replaces the whole LittleFS image, so the server image must contain both <code>/web</code> and <code>/voice</code>.</p></div>
+          <div class="button-row"><button class="btn secondary" id="checkUpdate">CHECK SERVER</button><button class="btn primary" id="startUpdate">START UPDATE</button></div>
+        </article>
+      </section>
+    </main>
+  </div>
+
+  <div id="toast" class="toast" role="status" aria-live="polite"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

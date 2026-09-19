@@ -1,13 +1,13 @@
 {
   "firmware": {
-    "version": "04.00.09",
-    "version_code": 40009,
-    "bin_file": "FW_v04.00.09_ESP32_3USB_3DLC_OTA.bin"
+    "version": "04.00.10",
+    "version_code": 40010,
+    "bin_file": "FW_v04.00.10_ESP32_3USB_3DLC_OTA.bin"
   },
 
   "filesystem": {
-    "version": "01.00.04",
-    "version_code": 10004,
-    "bin_file": "LittleFS_v01.00.04_ESP32_3USB_3DLC_OTA.bin"
+    "version": "01.00.05",
+    "version_code": 10005,
+    "bin_file": "LittleFS_v01.00.05_ESP32_3USB_3DLC_OTA.bin"
   }
 }

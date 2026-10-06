@@ -1,9 +1,11 @@
+---
+---
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
+    <meta name="description" content="Xem sơ đồ mạch điện, bản vẽ 3D, hướng dẫn lắp ráp và kết nối ứng dụng cho xe lập trình Arduino Bluetooth SC Tech Light.">
     <meta name="author" content="">
     <meta name="generator" content="">
     <!-- Google Font: -->
@@ -11,83 +13,30 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
-    <link rel="icon" href="/img/Gốc_BG_Trang.png" type="image/png+xml">
-    <title>SmartCarTech.VN</title>
+    <link rel="icon" href="/img/Gốc_BG_Trang.png" type="image/png">
+    <title>Hướng dẫn SC Tech Light | SmartCarTech</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    
 
 
-    <link rel="stylesheet" href="/css/bundle.css?v=rAOVhMzkPTgIJXvb5Fc8G8S9SGs" />
+
+    <link rel="stylesheet" href="/css/base-utilities.css?v=20260924-jekyll-1" />
+    <link rel="stylesheet" href="/css/site.css?v=20260924-jekyll-1" />
     <link rel="stylesheet" href="/css/zalo-contact.css?v=20260918-2" />
 
 </head>
 
 
 <body>
-    <nav class="navbar web-navbar web-navbar-01 navbar-expand-xl fixed-top">
-    <div class="container-fluid">
-        <a class="navbar-brand web-navbar-brand" href="/">
-            <img src="/img/Logo_Gốc_No_BG.png" alt="">
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav me-auto mb-4 mb-xl-0">
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="/product-landing.html">Sản Phẩm</a>
-                </li>
+    {% include header.html %}
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Hướng Dẫn</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/Instruction_SC_Tech.html">Arduino Bluetooth SC Tech</a></li>
-                        <li><a class="dropdown-item" href="/Instruction_SC_Tech_Pro.html">Arduino Bluetooth SC Tech Pro</a></li>
-                        <li><a class="dropdown-item" href="/Instruction_SC_Tech_Light.html">Arduino Bluetooth SC Tech Light</a></li>
-                        <!-- <li><a class="dropdown-item" href="#">ccc</a></li> -->
-                        <!-- <li><a class="dropdown-item" href="#">ddd</a></li> -->
-                        <!-- <li><a class="dropdown-item" href="#">eee</a></li> -->
-                        <!-- <li><a class="dropdown-item" href="#">fff</a></li> -->
-                        <!-- <li><a class="dropdown-item" href="#">ggg</a></li> -->
-                    </ul>
-                </li>
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Download Code</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="https://drive.google.com/drive/folders/1PurcY1TzcMV43oNoJn8Kobv6oSYnl2sU?usp=sharing" target="_blank"> Arduino Bluetooth SC Tech Pro</a></li>
-                        <li><a class="dropdown-item" href="https://drive.google.com/drive/folders/113d7rKSxIG81S78AUKseEEhZFHUibgi3?usp=sharing" target="_blank"> Arduino Bluetooth SC Tech Light</a></li>
-
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Liên Hệ</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="https://zalo.me/0374489282" data-zalo-contact target="_blank" rel="noopener noreferrer">Zalo: 037.448.9282</a></li>
-                        <li><a class="dropdown-item" href="https://www.facebook.com/smartcartechvietnam">Facebook</a></li>
-                        <li><a class="dropdown-item" href="https://www.tiktok.com/@smartcartech">TikTok</a></li>
-                        <li><a class="dropdown-item" href="https://www.youtube.com/@smartcartechvietnam">Youtube</a></li>
-                        <li><a class="dropdown-item" href="#">Mail: smartcartech.vn@gmail.com</a></li>
-                    </ul>
-                </li>
-            </ul>
-            <form class="d-flex mb-3">
-                <a href="https://www.tiktok.com/@smartcartech" class="web-btn web-btn-07 btn btn-bg-06 mr-3">Tik Tok</a>
-                <a href="https://www.youtube.com/@SmartCarTechVietNam" class="web-btn web-btn-06 btn btn-bg-05">Youtube</a>
-            </form>
-        </div>
-    </div>
-</nav>
-
-    
 <main class="web-autoauth-landing">
     <section class="web-section-01" style="background-image:url('/img/autoauth-landing/img-00.jpg');">
         <div class="web-container container-fluid text-center d-flex justify-content-center">
             <div class="web-section-content d-flex align-items-center flex-column">
-                <h2 class="fs-48 cl-fff mt-10 mt-lg-18"> Hướng Dẫn Lập Trình Arduino Bluetooth SC Tech Light </h2>
+                <h1 class="fs-48 cl-fff mt-10 mt-lg-18"> Hướng Dẫn Lập Trình Arduino Bluetooth SC Tech Light </h1>
                 <ul class="d-flex mt-auto mb-3">
                     <li>
                         <a href="#so-do-mach">Sơ đồ mạch điện</a>
@@ -106,32 +55,32 @@
     <section class="web-section-02 bg-fff py-6">
         <div class="web-container container-fluid">
 
-            <a href="#" data-hs-anchor="true" id="so-do-mach"></a>
+            <span data-hs-anchor="true" id="so-do-mach"></span>
             <h2 class="fs-36 cl-11"> Sơ Đồ Mạch Điện: </h2>
             <div class="web-bd-left-01 pl-4 mb-lg-10 mb-4">
                 <p class="mb-4">Sơ đồ mạch điện của Arduino Bluetooth SC-Tech Light. </p>
                 <p class="mb-6">Tải sơ đồ mạch: <a href="https://drive.google.com/drive/folders/1YcJHZTpbjo81Qk1Tq7Sdro2K1df4r4US?usp=sharing" target="_blank" class="cl-33"> nhấn vào đây. </a>   </p>
                 <div class="text-center">
-                    <img src="/img/autoauth-landing/img-01.png" alt="" width="1194">
+                    <img src="/img/autoauth-landing/img-01.png" alt="Sơ đồ mạch điện SC Tech Light" width="1194">
                 </div>
 
             </div>
 
-            <a href="#" data-hs-anchor="true"></a>
+            <span data-hs-anchor="true"></span>
             <h2 class="fs-36 cl-11"> Bản Vẽ 3D: </h2>
             <div class="web-bd-left-01 pl-4 mb-lg-10 mb-4">
                 <p class="mb-4">Bản vẽ 3D SolidWorks được thiết kế bằng phần mềm SolidWorks 2019. </p>
                 <p class="mb-6">Tải bản vẽ: <a href="https://drive.google.com/drive/folders/1yNRV_582DXAd5sLXivhxiFuKtpddJsaa?usp=sharing" target="_blank" class="cl-33"> nhấn vào đây. </a>   </p>
                 <div class="text-center">
-                    <img src="/img/autoauth-landing/3D_1.png" alt="" width="1194">
-                    <img src="/img/autoauth-landing/3D_2.png" alt="" width="1194">
+                    <img src="/img/autoauth-landing/3D_1.png" alt="Bản vẽ 3D xe SC Tech, góc nhìn thứ nhất" width="1194">
+                    <img src="/img/autoauth-landing/3D_2.png" alt="Bản vẽ 3D xe SC Tech, góc nhìn thứ hai" width="1194">
                 </div>
             </div>
 
-            <a href="#" data-hs-anchor="true" id="huong-dan-lap-rap"></a>
+            <span data-hs-anchor="true" id="huong-dan-lap-rap"></span>
             <h2 class="fs-36 cl-11 mb-2">Hướng Dẫn Lắp Ráp:</h2>
             <div class="web-bd-left-01 pl-4 mb-lg-10 mb-6">
-                
+
                 <p>
                     <strong>
                         Bước 1:
@@ -184,26 +133,26 @@
 
 
 
-            <a href="#" data-hs-anchor="true" id="huong-dan-ket-noi"></a>
+            <span data-hs-anchor="true" id="huong-dan-ket-noi"></span>
             <h2 class="fs-36 cl-11 mb-2">Hướng Dẫn Kết Nối:</h2>
             <div class="web-bd-left-01 pl-4 mb-lg-10 mb-6">
 
                 <p class="fs-24 cl-12 mb-7"> Tải App trên CH-Play. Quét mã QR Code:</p>
                         <div class="d-flex mb-4">
                             <p class="fs-32 cl-000 mr-3"> </p>
-                            <img src="/img/QR_App_SC Tech Light_CHPlay.png" alt="" width="150" class="mt-n4 mr-3">
+                            <img src="/img/QR_App_SC Tech Light_CHPlay.png" alt="Mã QR tải ứng dụng SC Tech Light trên Google Play" width="150" class="mt-n4 mr-3">
                             <p class="fs-32 cl-000">  </p>
                         </div>
 
                 <p class="fs-24 cl-12 mb-4"> hoặc nhấn vào đây: </p>
 
                         <div class="d-flex web-store flex-column flex-sm-row">
-                            <a href="https://play.google.com/store/apps/details?id=com.smartcartech.SC_Tech_Light" target="_blank" class="flex-shrink-0"><img src="/img/google-play-download.svg" alt="" class="mb-3" style="width:200px; height:auto;"></a>
+                            <a href="https://play.google.com/store/apps/details?id=com.smartcartech.SC_Tech_Light" target="_blank" class="flex-shrink-0"><img src="/img/google-play-download.svg" alt="Tải ứng dụng SC Tech Light trên Google Play" class="mb-3" style="width:200px; height:auto;"></a>
                         </div>
 
                 <p class="fs-24 cl-12 mb-7">  </p>
 
-                
+
                 <p>
                     <strong>
                         Bước 1: Kết nối Bluetooth giữa điện thoại và xe.
@@ -211,7 +160,7 @@
                 </p>
 
                 <p class="mb-4"> Bật công tắt trên xe ON. Trên điện thoại, vào mục bluetooth và bật bluetooth ON -> Ghép nối với "HC-06" (nhập mật khẩu 1234 nếu được yêu cầu).</p>
-                
+
 
 
                 <p>
@@ -221,9 +170,9 @@
                 </p>
 
                 <p class="mb-4"> Vào app (mật khẩu đăng nhập: 1234).</p>
-                
+
                 <div class="text-center mb-6">
-                    <img src="/img/App SmartCarTech_4.jpg" alt="" width="710">
+                    <img src="/img/App SmartCarTech_4.jpg" alt="Màn hình đăng nhập ứng dụng SmartCarTech" width="710">
                 </div>
 
 
@@ -234,9 +183,9 @@
                 </p>
 
                 <p class="mb-4"> Chọn "Setting" -> "Scan car" và chọn HC-06.</p>
-                
+
                 <div class="text-center mb-6">
-                    <img src="/img/App SmartCarTech_3.jpg" alt="" width="710">
+                    <img src="/img/App SmartCarTech_3.jpg" alt="Màn hình kết nối xe trong ứng dụng SmartCarTech" width="710">
                 </div>
 
                 <p>
@@ -246,9 +195,9 @@
                 </p>
 
                 <p class="mb-4"> Khi điện thoại hiển thị "Status: Connected" là điện thoại đã kết nối với xe thành công!</p>
-                
+
                 <div class="text-center mb-6">
-                    <img src="/img/App SmartCarTechLight.jpg" alt="" width="710">
+                    <img src="/img/App SmartCarTechLight.jpg" alt="Màn hình điều khiển xe trong ứng dụng SC Tech Light" width="710">
                 </div>
 
 
@@ -259,11 +208,11 @@
         </div>
     </section>
 
-    <a href="#" data-hs-anchor="true" id="have-question"></a>
+    <span data-hs-anchor="true" id="have-question"></span>
     <section class="bg-30 p-2 pt-4 p-lg-6 pt-lg-8">
         <div class="web-container container-fluid text-center">
             <div class="web-support-quest">
-                <h1 class="fs-36 cl-11 mb-4">Bạn Còn Câu Hỏi?</h1>
+                <h2 class="fs-36 cl-11 mb-4">Bạn Còn Câu Hỏi?</h2>
                 <p class="cl-000 mb-4 mb-lg-8"> Xin vui lòng liên hệ với chúng tôi để được hỗ trợ. <br> Nhóm dịch vụ khách hàng của chúng tôi sẵn sàng hỗ trợ bạn. Bạn có thể liên hệ với chúng tôi qua zalo, facebook, email hoặc trò chuyện trực tiếp. </p>
                 <div class="web-support-quest-phone bg-fff p4 mb-lg-8 mb-6">
                     <ul class="p-4">
@@ -279,116 +228,21 @@
                         </li>
                     </ul>
                 </div>
-                
+
             </div>
         </div>
     </section>
 </main>
 
-    <footer class="web-footer">
-	<div class="container-fluid">
-		<div class="row gx-5">
-			<div class="col-lg-4 col-xxl-3">
-				<div class="px-xxl-3 pb-2 pt-4">
-					<a href="/" class="mb-3"><img src="/img/Logo_Gốc_No_BG.png" alt="" height="100"></a>
-					<p class="fs-20 font-roboto-medium">
-						<!-- <a href="#">Liên Hệ</a> -->
-					</p>
-					<p class="fs-20 font-roboto-medium mb-3">
-						<a href="#" class="d-flex">
-							<!-- <span class="mr-2"> Đăng nhập  </span> -->
-							<!-- <img src="/img/svg/mail.svg" alt="" width="25">  -->
-						</a>
-					</p>
-					<div class="d-flex mb-3">
-						<!-- <a href="#" target="_blank" class="mr-2"><img src="/img/RSP/app-store.svg" alt="" height="36"></a> -->
-						<a href="https://play.google.com/store/apps/details?id=appinventor.ai_smartcartech_vn.Arduino_Bluetooth_SC_Tech" target="_blank" class="mr-2"><img src="/img/RSP/play-store.svg" alt="" height="36"></a>
-						<a href="https://www.youtube.com/@SmartCarTechVietNam" target="_blank"><img src="/img/RSP/youtube.svg" alt="" height="36"></a>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-8 col-xxl-9">
-				<div class="row mt-4 gx-5 gx-xxxl-15">
+    {% include footer.html %}
 
-					<div class="col-md-6 col-xxl-3 d-flex flex-column mb-4">
-						<h6 class="mb-0"> Sản Phẩm </h6>
-						<hr>
-						<ul class="bg-26 p-2 font-roboto-regular fs-20 h-100">
-							<li>
-								<a href="/product-landing.html">SC Tech Series</a>
-							</li>
-		
-						</ul>
-					</div>
-					<div class="col-md-6 col-xxl-3 d-flex flex-column mb-4">
-						<h6 class="mb-0"> Hướng Dẫn </h6>
-						<hr>
-						<ul class="bg-26 p-2 font-roboto-regular fs-20 h-100">
-                            <li><a class="dropdown-item" href="/Instruction_SC_Tech.html">Arduino Bluetooth SC Tech</a></li>
-                            <li><a class="dropdown-item" href="/Instruction_SC_Tech_Pro.html">Arduino Bluetooth SC Tech Pro</a></li>
-                            <li><a class="dropdown-item" href="/Instruction_SC_Tech_Light.html">Arduino Bluetooth SC Tech Light</a></li>
 
-						</ul>
-					</div>
-
-					<div class="col-md-6 col-xxl-3 d-flex flex-column mb-4">
-						<h6 class="mb-0"> Download Code </h6>
-						<hr>
-						<ul class="bg-26 p-2 font-roboto-regular fs-20 h-100">
-							<li>
-								<a href="https://drive.google.com/drive/folders/1PurcY1TzcMV43oNoJn8Kobv6oSYnl2sU?usp=sharing" target="_blank"> Arduino Bluetooth SC Tech Pro</a>
-							</li>
-							<li>
-								<a href="https://drive.google.com/drive/folders/113d7rKSxIG81S78AUKseEEhZFHUibgi3?usp=sharing" target="_blank"> Arduino Bluetooth SC Tech Light</a>
-							</li>
-                            
-                            <li>
-								<!-- <a href="#">aaa</a> -->
-							</li>
-							<li>
-								<!-- <a href="#">bbb</a> -->
-							</li>
-						</ul>
-					</div>
-
-					<div class="col-md-6 col-xxl-3 d-flex flex-column mb-4">
-						<h6 class="mb-0"> Liên Hệ </h6>
-						<hr>
-						<ul class="bg-26 p-2 font-roboto-regular fs-20 h-100">
-							<li>
-								<a href="https://zalo.me/0374489282" data-zalo-contact target="_blank" rel="noopener noreferrer">Zalo: 037.448.9282</a>
-							</li>
-							<li>
-								<a href="https://www.facebook.com/smartcartechvietnam">Facebook</a>
-							</li>
-							<li>
-								<a href="https://www.tiktok.com/@smartcartech">TikTok</a>
-							</li>
-							<li>
-								<a href="https://www.youtube.com/@smartcartechvietnam">Youtube</a>
-							</li>
-							<li>
-								<a href="#">Mail: smartcartech.vn@gmail.com</a>
-							</li>
-							<li>
-								<!-- <a href="#">DDD</a> -->
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-		<p class="fs-15 cl-13 mb-0"> © 2023–<script>document.write(new Date().getFullYear())</script> SmartCarTech. All rights reserved. </p>
-	</div>
-</footer>
-
-    
 
 
     <script src="/js/bundle.js?v=RTa8QIkjAMfZ0ONAXgu8QEfrYJc"></script>
     <script src="/js/bundle.custom.js?v=20260917-zalo-1"></script>
 
 
-    
+
 </body>
 </html>

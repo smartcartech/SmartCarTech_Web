@@ -1,9 +1,11 @@
+---
+---
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="">
+    <meta name="description" content="Khám phá các bộ xe lập trình Arduino Bluetooth SmartCarTech, so sánh linh kiện, xem hướng dẫn lắp ráp và tải ứng dụng điều khiển.">
     <meta name="author" content="">
     <meta name="generator" content="">
     <!-- Google Font: -->
@@ -11,93 +13,48 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700&family=Roboto:wght@400;500;700;900&display=swap" rel="stylesheet">
     <!-- Font Awesome -->
-    <link rel="icon" href="/img/Gốc_BG_Trang.png" type="image/png+xml">
-    <title>SmartCarTech.VN</title>
+    <link rel="icon" href="/img/Gốc_BG_Trang.png" type="image/png">
+    <title>Xe lập trình Arduino Bluetooth | SmartCarTech</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 
-    
 
 
-    <link rel="stylesheet" href="/css/bundle.css?v=rAOVhMzkPTgIJXvb5Fc8G8S9SGs" />
+
+    <link rel="stylesheet" href="/css/base-utilities.css?v=20260924-jekyll-1" />
+    <link rel="stylesheet" href="/css/site.css?v=20260924-jekyll-1" />
     <link rel="stylesheet" href="/css/zalo-contact.css?v=20260918-2" />
 
 </head>
 
 
 <body>
-    <nav class="navbar web-navbar web-navbar-01 navbar-expand-xl fixed-top">
-    <div class="container-fluid">
-        <a class="navbar-brand web-navbar-brand" href="/">
-            <img src="/img/Logo_Gốc_No_BG.png" alt="">
-        </a>
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarCollapse" aria-controls="navbarCollapse" aria-expanded="false" aria-label="Toggle navigation">
-            <span class="navbar-toggler-icon"></span>
-        </button>
-        <div class="collapse navbar-collapse" id="navbarCollapse">
-            <ul class="navbar-nav me-auto mb-4 mb-xl-0">
+    {% include header.html %}
 
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="/product-landing.html">Sản Phẩm</a>
 
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Hướng Dẫn</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="/Instruction_SC_Tech.html">Arduino Bluetooth SC Tech</a></li>
-                        <li><a class="dropdown-item" href="/Instruction_SC_Tech_Pro.html">Arduino Bluetooth SC Tech Pro</a></li>
-                        <li><a class="dropdown-item" href="/Instruction_SC_Tech_Light.html">Arduino Bluetooth SC Tech Light</a></li>
-                        
-                        <!-- <li><a class="dropdown-item" href="#">ccc</a></li> -->
-                        <!-- <li><a class="dropdown-item" href="#">ddd</a></li> -->
-                        <!-- <li><a class="dropdown-item" href="#">eee</a></li> -->
-                        <!-- <li><a class="dropdown-item" href="#">fff</a></li> -->
-                        <!-- <li><a class="dropdown-item" href="#">ggg</a></li> -->
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Download Code</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="https://drive.google.com/drive/folders/1PurcY1TzcMV43oNoJn8Kobv6oSYnl2sU?usp=sharing" target="_blank"> Arduino Bluetooth SC Tech Pro</a></li>
-                        <li><a class="dropdown-item" href="https://drive.google.com/drive/folders/113d7rKSxIG81S78AUKseEEhZFHUibgi3?usp=sharing" target="_blank"> Arduino Bluetooth SC Tech Light</a></li>
-                    </ul>
-                </li>
-
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">Liên Hệ</a>
-                    <ul class="dropdown-menu">
-                        <li><a class="dropdown-item" href="https://zalo.me/0374489282" data-zalo-contact target="_blank" rel="noopener noreferrer">Zalo: 037.448.9282</a></li>
-                        <li><a class="dropdown-item" href="https://www.facebook.com/smartcartechvietnam">Facebook</a></li>
-                        <li><a class="dropdown-item" href="https://www.tiktok.com/@smartcartech">TikTok</a></li>
-                        <li><a class="dropdown-item" href="https://www.youtube.com/@smartcartechvietnam">Youtube</a></li>
-                        <li><a class="dropdown-item" href="#">Mail: smartcartech.vn@gmail.com</a></li>
-                    </ul>
-                </li>
-            </ul>
-            <form class="d-flex mb-3">
-                <a href="https://www.tiktok.com/@smartcartech" class="web-btn web-btn-07 btn btn-bg-06 mr-3">Tik Tok</a>
-                <a href="https://www.youtube.com/@SmartCarTechVietNam" class="web-btn web-btn-06 btn btn-bg-05">Youtube</a>
-            </form>
-        </div>
-    </div>
-</nav>
-
-    
 <main class="web-landing">
     <!-- <section class="web-section-01 d-flex mb-4" style="background:url('/img/Bg_Option1.png') center center no-repeat;">
 
     </section>  -->
 
     <section class="web-section-01 mb-4">
-        <img src="/img/Gemini_Image_1.png" alt="" class="img-fluid w-100">
+        <picture>
+            <source type="image/webp"
+                    srcset="/img/Gemini_Image_1-768.webp 768w,
+                            /img/Gemini_Image_1-1280.webp 1280w,
+                            /img/Gemini_Image_1-1920.webp 1920w"
+                    sizes="100vw">
+            <img src="/img/Gemini_Image_1.png"
+                 alt="Xe điều khiển SmartCarTech kết nối ứng dụng trên điện thoại"
+                 class="img-fluid w-100" width="3064" height="1376"
+                 fetchpriority="high" decoding="async">
+        </picture>
     </section>
 
 
 
 
-    
+
     <section class="web-section-02 mx-sm-4 mb-4" id="buynow">
         <div class="web-inspector w-100">
             <div class="web-container container-fluid">
@@ -109,16 +66,16 @@
                             </div>
                             <div class="carousel-inner">
                                 <div class="carousel-item active">
-                                    <img src="/img/product/SDS43/carousel/slide-01.png" class="d-block w-100" alt="...">
+                                    <img src="/img/product/SDS43/carousel/slide-01.png" class="d-block w-100" alt="Xe lập trình SmartCarTech, ảnh 1">
                                 </div>
                                 <div class="carousel-item">
-                                    <img src="/img/product/SDS43/carousel/slide-02.png" class="d-block w-100" alt="...">
+                                    <img src="/img/product/SDS43/carousel/slide-02.png" class="d-block w-100" alt="Xe lập trình SmartCarTech, ảnh 2">
                                 </div>
                                 <div class="carousel-item">
-                                    <img src="/img/product/SDS43/carousel/slide-03.png" class="d-block w-100" alt="...">
+                                    <img src="/img/product/SDS43/carousel/slide-03.png" class="d-block w-100" alt="Xe lập trình SmartCarTech, ảnh 3">
                                 </div>
                                 <div class="carousel-item">
-                                    <img src="/img/product/SDS43/carousel/slide-04.png" class="d-block w-100" alt="...">
+                                    <img src="/img/product/SDS43/carousel/slide-04.png" class="d-block w-100" alt="Xe lập trình SmartCarTech, ảnh 4">
                                 </div>
                             </div>
                             <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleRide" data-bs-slide="prev">
@@ -134,9 +91,9 @@
                     <div class="col-xl-5">
                         <div class="mt-4 mt-xl-0 ml-8 ml-xl-0">
 
-                            <h2 class=" fs-40 font-barlow-semi-condensed-bold cl-01">
+                            <h1 class=" fs-40 font-barlow-semi-condensed-bold cl-01">
                                 <span>Xe Lập Trình</span>
-                            </h2>
+                            </h1>
 
                             <ul class="web-inspector-list fs-24 mb-5">
                                 <li><img src="/img/svg/check.svg" alt="" width="25"> Cảm biến tốc độ Encoder</li>
@@ -164,8 +121,8 @@
         </div>
     </section>
 
-    
-    <main class="web-product-landing">
+
+    <section class="web-product-landing">
         <h2 class="web-title-01 fs-40 font-barlow-semi-condensed-bold cl-01 mx-2">
             <span>Arduino SC-Tech</span>
         </h2>
@@ -173,7 +130,7 @@
             <div class="web-product-01 mb-4 mb-xl-6">
                 <div class="row gx-xl-0">
                     <div class="col-xl-4 col-lg-4 col-md-5 mb-4">
-                        <div class="web-product-img p-2 mx-auto mx-lg-0"> <a href=""> <img src="/img/product/SDS43/SDS43_1.png" alt="" width="280"> </a> </div>
+                        <div class="web-product-img p-2 mx-auto mx-lg-0"> <img src="/img/product/SDS43/SDS43_1.png" alt="Bộ xe lập trình Arduino Bluetooth đầy đủ linh kiện" width="280"> </div>
                     </div>
                     <div class="col-xl-6 col-lg-5 col-md-7 mb-4">
                         <div class="ml-xl-n4">
@@ -201,16 +158,16 @@
             <div class="web-product-01 mb-4 mb-xl-6">
                 <div class="row gx-xl-0">
                     <div class="col-xl-4 col-lg-4 col-md-5 mb-4">
-                        <div class="web-product-img p-2 mx-auto mx-lg-0"> <a href=""> <img src="/img/product/SDS50/SDS50_1.png" alt="" width="280"> </a> </div>
+                        <div class="web-product-img p-2 mx-auto mx-lg-0"> <img src="/img/product/SDS50/SDS50_1.png" alt="Bộ khung xe mica, động cơ và bánh xe Arduino Bluetooth" width="280"> </div>
                     </div>
                     <div class="col-xl-6 col-lg-5 col-md-7 mb-4">
                         <div class="ml-xl-n4">
-                            <h2 class="cl-01 mb-3"> Khung Xe Mica + Động Cơ + Bánh Xe Arduino Bluetooth SC-Tech </h2> 
+                            <h2 class="cl-01 mb-3"> Khung Xe Mica + Động Cơ + Bánh Xe Arduino Bluetooth SC-Tech </h2>
                             <h6 class="d-flex cl-23 font-roboto-regular mb-2">
                                 <img src="/img/product/award.svg" alt="" width="20" class="mr-1">
                                 <span>Khung Xe Mica + Động Cơ + Bánh Xe</span>
                             </h6>
-    
+
                             <h6 class="fs-20 cl-11"> Tính Năng Nổi Bật </h6>
                             <ul class="fs-14 cl-11 font-roboto-regular">
                                 <li><span class="fs-20">Khung xe Mica chắc chắn và cool ngầu</span></li>
@@ -218,7 +175,7 @@
                                 <li><span class="fs-20">Động cơ</span></li>
                                 <li><span class="fs-20">Bánh xe</span></li>
                                 <li><span class="fs-20">Tặng kèm dây điện</span></li>
-                                
+
                             </ul>
                         </div>
                     </div>
@@ -231,7 +188,7 @@
             <div class="web-product-01 mb-4 mb-xl-6">
                 <div class="row gx-xl-0">
                     <div class="col-xl-4 col-lg-4 col-md-5 mb-4">
-                        <div class="web-product-img p-2 mx-auto mx-lg-0"> <a href=""> <img src="/img/product/7111/7111_1.png" alt="" width="280"> </a> </div>
+                        <div class="web-product-img p-2 mx-auto mx-lg-0"> <img src="/img/product/7111/7111_1.png" alt="Bộ khung xe mica Arduino Bluetooth" width="280"> </div>
                     </div>
                     <div class="col-xl-6 col-lg-5 col-md-7 mb-4">
                         <div class="ml-xl-n4">
@@ -258,221 +215,8 @@
         <h2 class="web-title-01 fs-40 font-barlow-semi-condensed-bold cl-01 mx-2">
             <span>SO SÁNH CÁC SẢN PHẨM</span>
         </h2>
-        <section class="web-product-compare mb-4">
-            <div class="web-container container-fluid mx-auto">
-                <div class="web-product-compare-tbl table-responsive drag-table">
-                    <table class="w-100" cellpadding="0" cellspacing="0" class="table">
-                        <thead>
-                            <tr>
-                                <th></th>
-                                <th align="center">
-                                    <div class="web-product-img mx-auto mx-lg-0"> <a href=""> <img src="/img/product/SDS43/SDS43_1.png" alt="" width="280"> </a> </div>
-                                </th>
-                                <th align="center">
-                                    <div class="web-product-img mx-auto mx-lg-0"> <a href=""> <img src="/img/product/SDS50/SDS50_1.png" alt="" width="280"> </a> </div>
-                                </th>
-                                <th align="center">
-                                    <div class="d-flex h-100">
-                                        <div class="web-product-img mx-auto mx-lg-0"> <a href=""> <img src="/img/product/7111/7111_1.png" alt="" width="280"> </a> </div>
-                                    </div>
-                                </th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td align="left" width="32%">
-                                    <h2 class="font-barlow-semi-condensed-semi-bold cl-01"> Tên Linh Kiện </h2>
-                                </td>
-                                <td align="center" width="22.66%">
-                                    <h2 class="font-barlow-semi-condensed-semi-bold cl-01">Xe Lập Trình Arduino Bluetooth Đầy Đủ Linh Kiện (có Tặng Code + App)</h2>
-                                </td>
-                                <td align="center" width="22.66%">
-                                    <h2 class="font-barlow-semi-condensed-semi-bold cl-01">Khung Xe Mica + Động Cơ + Bánh Xe Arduino Bluetooth SC-Tech</h2>
-                                </td>
-                                <td align="center" width="22.66%">
-                                    <h2 class="font-barlow-semi-condensed-semi-bold cl-01">Khung Xe Mica Arduino Bluetooth SC-Tech</h2>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td align="left">Bộ Khung Mica</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Trụ đồng cái-cái 30mm</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Bộ ốc gắn linh kiện, gắn khung mica</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Động cơ giảm tốc V1 + bánh xe</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Cảm biến siêu âm HC-SR04</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Đĩa encoder 20 xung</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Module cảm biến tốc độ encoder V2</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            <tr>
-                                <td align="left">Arduino nano V3.0 ATmega328P</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Dây cáp Mini USB</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Đế ra chân arduino nano IO Shield V1.0</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Mạch giảm áp Buck DC-DC LM2596 có hiển thị</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Pin Cell 18650 2000mAh 3.7V dòng xả cao 20A</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Đế pin 18650 4 cell có chân hàn</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Mạch sạc và bảo vệ Pin 4S 20A</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Jack nguồn DC-022B 5.5-2.1MM</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Adapter Sạc Pin 4S 16.8V 2A</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Driver motor L298N</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Module thu phát bluetooth HC-06</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Buzzer 5V</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Đèn led 7 màu</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Đèn led trắng siêu sáng</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Điện trở 220 Ω</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Điện trở 56 Ω</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Công tắc</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Dây bus đực cái 10cm (20 sợi)</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Trụ đồng cái-cái 6mm</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Dây điện (mỗi màu 100 cm: đỏ/đen/xanh dương/vàng/trắng)</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Ống co nhiệt 2mm (50 cm)</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                                <td align="left">Ống co nhiệt 5mm (50 cm)</td>
-                                <td align="center"><img src="/img/svg/check.svg" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                                <td align="center"><img src="" alt="" width="25"></td>
-                            </tr>
-                            <tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </section>
-    </main>
+        {% include comparison.html %}
+    </section>
 
 
 
@@ -483,20 +227,30 @@
         <div class="container-fluid">
             <div class="row gx-0 text-center">
                 <div class="col-12">
-                    <img src="/img/Gemini_Image_2.png" alt="" style="width: 100%; height: auto;">
+                    <picture>
+                        <source type="image/webp"
+                                srcset="/img/Gemini_Image_2-768.webp 768w,
+                                        /img/Gemini_Image_2-1280.webp 1280w,
+                                        /img/Gemini_Image_2-1920.webp 1920w"
+                                sizes="100vw">
+                        <img src="/img/Gemini_Image_2.png"
+                             alt="Xe robot SmartCarTech và ứng dụng điều khiển trên điện thoại"
+                             width="3064" height="1376" style="width: 100%; height: auto;"
+                             loading="lazy" decoding="async">
+                    </picture>
                 </div>
 
 
                 <!-- <div class="col-md-6 col-lg-4">
-                    <img src="/img/AI_1.jpg" alt="" width="525">
+                    <img src="/img/AI_1.jpg" alt="Xe lập trình SmartCarTech" width="525">
                 </div>
                 <div class="col-md-6 col-lg-4">
-                    <img src="/img/AI_4.jpg" alt="" width="526">
+                    <img src="/img/AI_4.jpg" alt="Học lập trình với xe SmartCarTech" width="526">
                 </div>
                 <div class="col-md-6 col-lg-4">
-                    <img src="/img/AI_5.jpg" alt="" width="526">
+                    <img src="/img/AI_5.jpg" alt="Ứng dụng xe lập trình SmartCarTech" width="526">
                 </div> -->
-   
+
             </div>
         </div>
         <div class="text-center bg-fff pt-5 pb-2 px-4">
@@ -518,11 +272,11 @@
                             </div>
                             <div>
                                 <h6 class="cl-05 font-roboto-medium mb-1">Kết nối Bluetooth giữa điện thoại và xe.</h6>
-                                
 
-                            
+
+
                             </div>
-                            
+
                         </li>
                         <li>
                             <div class="web-step bg-03 mr-3">
@@ -535,7 +289,7 @@
                                 </p>
 
                                 <div >
-                                    <img src="/img/App SmartCarTech_4.jpg" alt="" width="510"> 
+                                    <img src="/img/App SmartCarTech_4.jpg" alt="Màn hình đăng nhập ứng dụng SmartCarTech" width="510">
                                 </div>
 
                             </div>
@@ -549,7 +303,7 @@
                                 <!-- <p class="fs-20 cl-16">A B C. </p> -->
 
                                 <div >
-                                    <img src="/img/App SmartCarTech_3.jpg" alt="" width="510"> 
+                                    <img src="/img/App SmartCarTech_3.jpg" alt="Màn hình kết nối xe trong ứng dụng SmartCarTech" width="510">
                                 </div>
 
                             </div>
@@ -560,10 +314,10 @@
                             </div>
                             <div>
                                 <h6 class="cl-05 font-roboto-medium mb-1">Thoải mái điều khiển và lập trình xe.</h6>
-                                
+
 
                                 <div >
-                                    <img src="/img/App SmartCarTech.jpg" alt="" width="510"> 
+                                    <img src="/img/App SmartCarTech.jpg" alt="Màn hình điều khiển xe trong ứng dụng SmartCarTech" width="510">
                                 </div>
 
                                 <h6 class="font-roboto-regular cl-18 mb-2"> Bạn Gặp Vấn Đề? <a href="https://zalo.me/0374489282" data-zalo-contact target="_blank" rel="noopener noreferrer" class="cl-16 font-roboto-medium">Liên hệ Zalo 037.448.9282</a> để được hỗ trợ. </h6>
@@ -574,7 +328,7 @@
 
                 <!--
                 <div class="col-lg-5 order-1 order-lg-2 text-center text-lg-start pl-8 pt-9 pb-4 hihiha">
-                    <img src="/img/App SmartCarTech_3.jpg" alt="" width="510"> 
+                    <img src="/img/App SmartCarTech_3.jpg" alt="Màn hình kết nối xe trong ứng dụng SmartCarTech" width="510">
                 </div>
                 -->
 
@@ -587,16 +341,16 @@
             <div class="row gx-0">
                 <div class="col-lg-5 order-2 order-lg-1">
                     <div class="ml-6 ml-md-8 my-8">
-                        <h1 class="fs-64 cl-11 mb-5">Tải App Điều Khiển</h1>
+                        <h2 class="fs-64 cl-11 mb-5">Tải App Điều Khiển</h2>
                         <p class="fs-24 cl-12 mb-7"> Tải App trên CH-Play ngay và trải nghiệm!</p>
                         <div class="d-flex mb-4">
                             <p class="fs-32 cl-000 mr-3"> </p>
-                            <img src="/img/QR_App_SC Tech Pro_CHPlay.png" alt="" width="150" class="mt-n4 mr-3">
+                            <img src="/img/QR_App_SC Tech Pro_CHPlay.png" alt="Mã QR tải ứng dụng SC Tech Pro trên Google Play" width="150" class="mt-n4 mr-3">
                             <p class="fs-32 cl-000">  </p>
                         </div>
                         <div class="d-flex web-store flex-column flex-sm-row">
                             <!-- <a href="#" class="flex-shrink-0"><img src="/img/app-store-download.svg" alt="" class="mr-3 mb-3"></a> -->
-                            <a href="https://play.google.com/store/apps/details?id=com.smartcartech.SC_Tech_Pro" target="_blank" class="flex-shrink-0"><img src="/img/google-play-download.svg" alt="" class="mb-3"></a>
+                            <a href="https://play.google.com/store/apps/details?id=com.smartcartech.SC_Tech_Pro" target="_blank" class="flex-shrink-0"><img src="/img/google-play-download.svg" alt="Tải ứng dụng SC Tech  trên Google Play" class="mb-3"></a>
                         </div>
                     </div>
                 </div>
@@ -604,7 +358,7 @@
                 <!--
                 <div class="col-lg-7 order-1 order-lg-2 text-center">
                     <div class="web-mac-pro">
-                        <img src="/img/2023-07-08_21-33-12-removebg-preview.png" alt="" width="">
+                        <img src="/img/2023-07-08_21-33-12-removebg-preview.png" alt="Xe lập trình SmartCarTech">
                     </div>
                 </div>
                 -->
@@ -614,111 +368,15 @@
     </section>
 </main>
 
-    <footer class="web-footer">
-	<div class="container-fluid">
-		<div class="row gx-5">
-			<div class="col-lg-4 col-xxl-3">
-				<div class="px-xxl-3 pb-2 pt-4">
-					<a href="/" class="mb-3"><img src="/img/Logo_Gốc_No_BG.png" alt="" height="100"></a>
-					<p class="fs-20 font-roboto-medium">
-						<!-- <a href="#">Liên Hệ</a> -->
-					</p>
-					<p class="fs-20 font-roboto-medium mb-3">
-						<a href="#" class="d-flex">
-							<!-- <span class="mr-2"> Đăng nhập  </span> -->
-							<!-- <img src="/img/svg/mail.svg" alt="" width="25">  -->
-						</a>
-					</p>
-					<div class="d-flex mb-3">
-						<!-- <a href="#" target="_blank" class="mr-2"><img src="/img/RSP/app-store.svg" alt="" height="36"></a> -->
-						<a href="https://play.google.com/store/apps/details?id=appinventor.ai_smartcartech_vn.Arduino_Bluetooth_SC_Tech" target="_blank" class="mr-2"><img src="/img/RSP/play-store.svg" alt="" height="36"></a>
-						<a href="https://www.youtube.com/@SmartCarTechVietNam" target="_blank"><img src="/img/RSP/youtube.svg" alt="" height="36"></a>
-					</div>
-				</div>
-			</div>
-			<div class="col-lg-8 col-xxl-9">
-				<div class="row mt-4 gx-5 gx-xxxl-15">
+    {% include footer.html %}
 
-					<div class="col-md-6 col-xxl-3 d-flex flex-column mb-4">
-						<h6 class="mb-0"> Sản Phẩm </h6>
-						<hr>
-						<ul class="bg-26 p-2 font-roboto-regular fs-20 h-100">
-							<li>
-								<a href="/product-landing.html">SC Tech Series</a>
-							</li>
-		
-						</ul>
-					</div>
-					<div class="col-md-6 col-xxl-3 d-flex flex-column mb-4">
-						<h6 class="mb-0"> Hướng Dẫn </h6>
-						<hr>
-						<ul class="bg-26 p-2 font-roboto-regular fs-20 h-100">
-                            <li><a class="dropdown-item" href="/Instruction_SC_Tech.html">Arduino Bluetooth SC Tech</a></li>
-                            <li><a class="dropdown-item" href="/Instruction_SC_Tech_Pro.html">Arduino Bluetooth SC Tech Pro</a></li>
-                            <li><a class="dropdown-item" href="/Instruction_SC_Tech_Light.html">Arduino Bluetooth SC Tech Light</a></li>
 
-                            
-						</ul>
-					</div>
-
-					<div class="col-md-6 col-xxl-3 d-flex flex-column mb-4">
-						<h6 class="mb-0"> Download Code </h6>
-						<hr>
-						<ul class="bg-26 p-2 font-roboto-regular fs-20 h-100">
-							<li>
-								<a href="https://drive.google.com/drive/folders/1PurcY1TzcMV43oNoJn8Kobv6oSYnl2sU?usp=sharing" target="_blank"> Arduino Bluetooth SC Tech Pro</a>
-							</li>
-							<li>
-								<a href="https://drive.google.com/drive/folders/113d7rKSxIG81S78AUKseEEhZFHUibgi3?usp=sharing" target="_blank"> Arduino Bluetooth SC Tech Light</a>
-							</li>
-
-							<li>
-								<!-- <a href="#">aaa</a> -->
-							</li>
-							<li>
-								<!-- <a href="#">bbb</a> -->
-							</li>
-						</ul>
-					</div>
-
-					<div class="col-md-6 col-xxl-3 d-flex flex-column mb-4">
-						<h6 class="mb-0"> Liên Hệ </h6>
-						<hr>
-						<ul class="bg-26 p-2 font-roboto-regular fs-20 h-100">
-							<li>
-								<a href="https://zalo.me/0374489282" data-zalo-contact target="_blank" rel="noopener noreferrer">Zalo: 037.448.9282</a>
-							</li>
-							<li>
-								<a href="https://www.facebook.com/smartcartechvietnam">Facebook</a>
-							</li>
-							<li>
-								<a href="https://www.tiktok.com/@smartcartech">TikTok</a>
-							</li>
-							<li>
-								<a href="https://www.youtube.com/@smartcartechvietnam">Youtube</a>
-							</li>
-							<li>
-								<a href="#">Mail: smartcartech.vn@gmail.com</a>
-							</li>
-							<li>
-								<!-- <a href="#">DDD</a> -->
-							</li>
-						</ul>
-					</div>
-				</div>
-			</div>
-		</div>
-		<p class="fs-15 cl-13 mb-0"> © 2023–<script>document.write(new Date().getFullYear())</script> SmartCarTech. All rights reserved. </p>
-	</div>
-</footer>
-
-    
 
 
     <script src="/js/bundle.js?v=RTa8QIkjAMfZ0ONAXgu8QEfrYJc"></script>
     <script src="/js/bundle.custom.js?v=20260917-zalo-1"></script>
 
 
-    
+
 </body>
 </html>
